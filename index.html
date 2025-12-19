@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Burada Geçen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #0e0e0e;
+      color: #f3f3f3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 340px;
+      padding: 20px;
+    }
+
+    #time {
+      font-size: 36px;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+      opacity: 0.9;
+    }
+
+    #message {
+      font-size: 17px;
+      line-height: 1.6;
+      opacity: 0.75;
+      transition: opacity 1s;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div id="time">00:00</div>
+  <div id="message">Buradasın. Bu da bir başlangıç.</div>
+</div>
+
+<script>
+  let seconds = 0;
+
+  function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function getMessage(seconds) {
+    if (seconds < 30) {
+      return pick([
+        "Buradasın. Bu da bir başlangıç.",
+        "Durmak da bir harekettir.",
+        "Şu an kendine denk geldin.",
+        "Kimse senden hız istemiyor."
+      ]);
+    } 
+    else if (seconds < 60) {
+      return pick([
+        "Bir dakika geçti… fark ettin mi?",
+        "Bu sessizlik sana iyi geliyor olabilir.",
+        "Zaman akıyor ama sen kaçmıyorsun.",
+        "Burada olman tesadüf değil."
+      ]);
+    } 
+    else if (seconds < 120) {
+      return pick([
+        "İstersen şimdi çıkıp küçük bir şey başlatabilirsin.",
+        "Mükemmel olmak zorunda değilsin.",
+        "Küçük bir adım hâlâ adımdır.",
+        "Başlayanlar, bir noktada karar verir."
+      ]);
+    } 
+    else if (seconds < 180) {
+      return pick([
+        "Buraya kadar geldiysen, sandığından güçlüsün.",
+        "Hazır hissetmeden de başlanır.",
+        "Ertelediğin şey, düşündüğünden küçük olabilir.",
+        "Bu senin temposun."
+      ]);
+    } 
+    else {
+      return pick([
+        "Artık çıkabilirsin. Ya da biraz daha nefes alabilirsin.",
+        "Bugün bir şey değişecekse, buradan sonra.",
+        "Kendin için ayırdığın bu zaman boşa değil.",
+        "Hadi. Küçük ama gerçek bir adım."
+      ]);
+    }
+  }
+
+  setInterval(() => {
+    seconds++;
+
+    const min = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const sec = String(seconds % 60).padStart(2, '0');
+    document.getElementById("time").textContent = `${min}:${sec}`;
+
+    if (seconds % 15 === 0) {
+      const messageEl = document.getElementById("message");
+      messageEl.style.opacity = 0;
+
+      setTimeout(() => {
+        messageEl.textContent = getMessage(seconds);
+        messageEl.style.opacity = 0.75;
+      }, 500);
+    }
+  }, 1000);
+</script>
+
+</body>
+</html>
