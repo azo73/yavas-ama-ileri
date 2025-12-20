@@ -34,7 +34,6 @@ body {
   text-align: center;
 }
 
-/* Tabs */
 .tabs {
   display: flex;
   gap: 8px;
@@ -57,14 +56,12 @@ body {
   opacity: 1;
 }
 
-/* Timer */
 #time {
   font-size: 72px;
   font-weight: 700;
   margin: 25px 0;
 }
 
-/* Buttons */
 button {
   width: 100%;
   padding: 14px 0;
@@ -78,7 +75,6 @@ button {
   margin-top: 10px;
 }
 
-/* Settings */
 .settings {
   margin-top: 25px;
   text-align: left;
@@ -132,11 +128,6 @@ button {
   </div>
 </div>
 
-<!-- YAĞMUR SESİ -->
-<audio id="rainAudio" loop>
-  <source src="sounds/rain.mp3" type="audio/mpeg">
-</audio>
-
 <script>
 let workMinutes = 25;
 let breakMinutes = 5;
@@ -146,14 +137,16 @@ let isWork = true;
 let interval;
 let rainOn = false;
 
+/* 🔊 YAĞMUR SESİ – EN SAĞLAM YÖNTEM */
+const rainAudio = new Audio("sounds/rain.mp3");
+rainAudio.loop = true;
+rainAudio.volume = 0.6;
+
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("startBtn");
 const rainBtn = document.getElementById("rainBtn");
-const rainAudio = document.getElementById("rainAudio");
-
 const tabWork = document.getElementById("tab-work");
 const tabBreak = document.getElementById("tab-break");
-
 const workInput = document.getElementById("workInput");
 const breakInput = document.getElementById("breakInput");
 
@@ -193,9 +186,15 @@ startBtn.onclick = () => {
 };
 
 rainBtn.onclick = () => {
-  rainOn = !rainOn;
-  rainOn ? rainAudio.play() : rainAudio.pause();
-  rainBtn.textContent = rainOn ? "🌧️ Yağmur Kapat" : "🌧️ Yağmur Aç";
+  if (!rainOn) {
+    rainAudio.play();
+    rainOn = true;
+    rainBtn.textContent = "🌧️ Yağmur Kapat";
+  } else {
+    rainAudio.pause();
+    rainOn = false;
+    rainBtn.textContent = "🌧️ Yağmur Aç";
+  }
 };
 
 tabWork.onclick = () => switchMode(true);
