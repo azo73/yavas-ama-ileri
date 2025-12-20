@@ -5,7 +5,6 @@
   <title>Yavaş Ama İleri</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- AdSense (yer doğru) -->
   <meta name="google-adsense-account" content="ca-pub-5935458968037999">
 
   <style>
@@ -77,6 +76,22 @@
 <body>
 
 <div class="container">
+  <div id="controls">
+  <div>
+    Çalışma
+    <button onclick="changeWork(-5)">−</button>
+    <span id="workLabel">25 dk</span>
+    <button onclick="changeWork(5)">+</button>
+  </div>
+
+  <div style="margin-top:10px;">
+    Mola
+    <button onclick="changeBreak(-1)">−</button>
+    <span id="breakLabel">5 dk</span>
+    <button onclick="changeBreak(1)">+</button>
+  </div>
+</div>
+
   <h1>Yavaş Ama İleri</h1>
 
   <div id="timer">25:00</div>
