@@ -181,16 +181,17 @@ let timeLeft = workMinutes * 60;
   }
 
   function switchMode() {
-    if (isWorking) {
-      isWorking = false;
-      timeLeft = BREAK_TIME;
-      statusEl.textContent = "Mola zamanı ☕";
-    } else {
-      isWorking = true;
-      timeLeft = WORK_TIME;
-      statusEl.textContent = "Odak zamanı";
-    }
+  if (isWorking) {
+    isWorking = false;
+    timeLeft = breakMinutes * 60;
+    statusEl.textContent = "Mola zamanı ☕";
+  } else {
+    isWorking = true;
+    timeLeft = workMinutes * 60;
+    statusEl.textContent = "Odak zamanı";
   }
+}
+
 
   btn.addEventListener("click", () => {
     if (!running) {
