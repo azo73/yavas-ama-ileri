@@ -88,7 +88,7 @@ button {
   margin-top: 12px;
 }
 
-.setting-row input {
+.setting-row input[type="number"] {
   width: 60px;
   padding: 6px;
   border-radius: 6px;
@@ -96,6 +96,10 @@ button {
   text-align: center;
   background: #222;
   color: var(--yellow);
+}
+
+.setting-row input[type="range"] {
+  width: 120px;
 }
 </style>
 </head>
@@ -125,6 +129,11 @@ button {
       <span>Mola (dk)</span>
       <input type="number" id="breakInput" value="5" min="1">
     </div>
+
+    <div class="setting-row">
+      <span>Yağmur Sesi</span>
+      <input type="range" id="volumeSlider" min="0" max="100" value="60">
+    </div>
   </div>
 </div>
 
@@ -137,14 +146,16 @@ let isWork = true;
 let interval;
 let rainOn = false;
 
-/* 🔊 YAĞMUR SESİ – EN SAĞLAM YÖNTEM */
-const rainAudio = new Audio("sounds/rain.mp3");
+/* ✅ DOĞRU SES YOLU */
+const rainAudio = new Audio("rain.mp3");
 rainAudio.loop = true;
 rainAudio.volume = 0.6;
 
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("startBtn");
 const rainBtn = document.getElementById("rainBtn");
+const volumeSlider = document.getElementById("volumeSlider");
+
 const tabWork = document.getElementById("tab-work");
 const tabBreak = document.getElementById("tab-break");
 const workInput = document.getElementById("workInput");
@@ -195,6 +206,10 @@ rainBtn.onclick = () => {
     rainOn = false;
     rainBtn.textContent = "🌧️ Yağmur Aç";
   }
+};
+
+volumeSlider.oninput = () => {
+  rainAudio.volume = volumeSlider.value / 100;
 };
 
 tabWork.onclick = () => switchMode(true);
