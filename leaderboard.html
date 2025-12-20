@@ -2,63 +2,87 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Skor Tablosu</title>
+<title>Yavaş Ama İleri – Skor Tablosu</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+:root{
+  --yellow:#f5c400;--dark:#000;--card:#111;--soft:#1a1a1a
+}
+*{box-sizing:border-box}
 body{
-  margin:0;background:#000;color:#f5c400;
-  font-family:system-ui;
-  display:flex;justify-content:center;
+  margin:0;background:var(--dark);color:var(--yellow);
+  font-family:system-ui,sans-serif;
+  min-height:100vh;display:flex;justify-content:center
 }
-.board{
-  width:360px;padding:20px;
-}
-h1{text-align:center}
-.item{
+.container{width:360px;margin-top:40px}
+.card{background:var(--card);border-radius:18px;padding:20px}
+h1{text-align:center;font-size:20px;margin-bottom:16px}
+.row{
   display:flex;justify-content:space-between;
-  padding:10px;border-bottom:1px solid #222;
+  padding:10px;border-radius:8px;
+  margin-bottom:8px;background:var(--soft)
 }
-.rank{opacity:.6}
+.row.me{background:var(--yellow);color:#000;font-weight:600}
+.rank{width:30px}
+.name{flex:1}
+.score{width:70px;text-align:right}
+a{
+  display:block;text-align:center;
+  margin-top:20px;color:var(--yellow);
+  text-decoration:none
+}
 </style>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "BURAYA",
-  authDomain: "BURAYA",
-  projectId: "BURAYA",
-  storageBucket: "BURAYA",
-  messagingSenderId: "BURAYA",
-  appId: "BURAYA"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const q = query(collection(db, "leaderboard"), orderBy("score", "desc"));
-const snap = await getDocs(q);
-
-let i = 1;
-snap.forEach(doc => {
-  const d = doc.data();
-  document.getElementById("list").innerHTML += `
-    <div class="item">
-      <span class="rank">#${i++}</span>
-      <span>${d.username}</span>
-      <strong>${d.score}</strong>
-    </div>
-  `;
-});
-</script>
 </head>
 
 <body>
-<div class="board">
-  <h1>🏆 Skor Tablosu</h1>
-  <div id="list"></div>
+
+<div class="container">
+  <div class="card">
+    <h1>🏆 Skor Tablosu</h1>
+    <div id="list"></div>
+  </div>
+
+  <a href="index.html">← Pomodoro’ya Dön</a>
 </div>
+
+<script>
+const listEl = document.getElementById("list");
+
+/* 👤 kullanıcı bilgisi */
+const myName = localStorage.getItem("username") || "Misafir";
+const myScore = Number(localStorage.getItem("score")) || 0;
+
+/* 📊 leaderboard */
+let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+
+/* 🔄 kullanıcıyı güncelle / ekle */
+const index = leaderboard.findIndex(u => u.name === myName);
+if(index !== -1){
+  leaderboard[index].score = myScore;
+}else{
+  leaderboard.push({ name: myName, score: myScore });
+}
+
+/* 🔽 sırala */
+leaderboard.sort((a,b)=>b.score-a.score);
+
+/* 💾 kaydet */
+localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+
+/* 🖥️ ekrana yaz */
+listEl.innerHTML = "";
+leaderboard.forEach((u,i)=>{
+  const row = document.createElement("div");
+  row.className = "row" + (u.name === myName ? " me" : "");
+  row.innerHTML = `
+    <div class="rank">${i+1}</div>
+    <div class="name">${u.name}</div>
+    <div class="score">${u.score}</div>
+  `;
+  listEl.appendChild(row);
+});
+</script>
+
 </body>
 </html>
