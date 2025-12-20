@@ -69,6 +69,7 @@ input,select{
   </div>
 
   <button id="startBtn">START</button>
+  <button id="rainBtn">🌧️ Yağmur Aç</button>
 
   <div class="settings">
     <strong>Bugün Ne Yapacağım?</strong>
@@ -111,6 +112,12 @@ if(!username){
   localStorage.setItem("username", username);
 }
 
+/* 🌧️ YAĞMUR SESİ */
+const rainAudio = new Audio("rain.mp3");
+rainAudio.loop = true;
+rainAudio.volume = 0.6;
+let rainOn = false;
+
 /* ⏱️ TIMER */
 let workMin=25, breakMin=5, timeLeft=1500;
 let isWork=true, running=false, interval;
@@ -124,6 +131,7 @@ let tasks = JSON.parse(localStorage.getItem("tasks"))||[];
 
 const timeEl=document.getElementById("time");
 const startBtn=document.getElementById("startBtn");
+const rainBtn=document.getElementById("rainBtn");
 const tabWork=document.getElementById("tabWork");
 const tabBreak=document.getElementById("tabBreak");
 const taskInput=document.getElementById("taskInput");
@@ -183,6 +191,19 @@ startBtn.onclick=()=>{
   } else {
     running=false; clearInterval(interval);
     startBtn.textContent="START";
+  }
+};
+
+rainBtn.onclick=()=>{
+  if(!rainOn){
+    rainAudio.currentTime=0;
+    rainAudio.play().catch(()=>alert("Ekrana bir kez tıkla"));
+    rainOn=true;
+    rainBtn.textContent="🌧️ Yağmur Kapat";
+  } else {
+    rainAudio.pause();
+    rainOn=false;
+    rainBtn.textContent="🌧️ Yağmur Aç";
   }
 };
 
