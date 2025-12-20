@@ -6,6 +6,30 @@
    <title>Yavaş Ama İleri</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    #pomodoro {
+  margin-top: 30px;
+}
+
+#pomo-time {
+  font-size: 28px;
+  margin-bottom: 12px;
+  opacity: 0.9;
+}
+
+#pomo-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #f3f3f3;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#pomo-btn:hover {
+  opacity: 0.8;
+}
+
     body {
       margin: 0;
       height: 100vh;
@@ -41,6 +65,11 @@
 <body>
 
 <div class="container">
+  <div id="pomodoro">
+  <div id="pomo-time">25:00</div>
+  <button id="pomo-btn">Başla</button>
+</div>
+
   <div id="time">00:00</div>
   <div id="message">Buradasın. Bu da bir başlangıç.</div>
 </div>
@@ -113,6 +142,46 @@
     }
   }, 1000);
 </script>
+  <script>
+  let pomoSeconds = 25 * 60;
+  let pomoInterval = null;
+  let running = false;
+
+  const pomoTimeEl = document.getElementById("pomo-time");
+  const pomoBtn = document.getElementById("pomo-btn");
+
+  function updatePomo() {
+    const m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
+    const s = String(pomoSeconds % 60).padStart(2, '0');
+    pomoTimeEl.textContent = `${m}:${s}`;
+  }
+
+  pomoBtn.addEventListener("click", () => {
+    if (!running) {
+      running = true;
+      pomoBtn.textContent = "Durdur";
+      pomoInterval = setInterval(() => {
+        pomoSeconds--;
+        updatePomo();
+
+        if (pomoSeconds <= 0) {
+          clearInterval(pomoInterval);
+          pomoTimeEl.textContent = "Mola zamanı ☕";
+          pomoBtn.textContent = "Tekrar Başla";
+          pomoSeconds = 25 * 60;
+          running = false;
+        }
+      }, 1000);
+    } else {
+      clearInterval(pomoInterval);
+      pomoBtn.textContent = "Devam";
+      running = false;
+    }
+  });
+
+  updatePomo();
+</script>
+
   <footer style="position:fixed;bottom:10px;width:100%;font-size:12px;opacity:0.4;">
   © 2025 Yavaş Ama İleri
 </footer>
