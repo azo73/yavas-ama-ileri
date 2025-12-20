@@ -64,25 +64,25 @@ body {
   margin: 25px 0;
 }
 
-/* Button */
-#startBtn {
+/* Buttons */
+button {
   width: 100%;
   padding: 14px 0;
-  font-size: 18px;
+  font-size: 16px;
   border: none;
   border-radius: 10px;
   cursor: pointer;
   background: var(--yellow);
   color: #000;
   font-weight: 600;
+  margin-top: 10px;
 }
 
 /* Settings */
 .settings {
-  margin-top: 30px;
+  margin-top: 25px;
   text-align: left;
   font-size: 14px;
-  opacity: 0.85;
 }
 
 .setting-row {
@@ -115,6 +115,7 @@ body {
   <div id="time">25:00</div>
 
   <button id="startBtn">START</button>
+  <button id="rainBtn">🌧️ Yağmur Aç</button>
 
   <div class="settings">
     <strong>Ayarlar</strong>
@@ -131,6 +132,11 @@ body {
   </div>
 </div>
 
+<!-- YAĞMUR SESİ -->
+<audio id="rainAudio" loop>
+  <source src="sounds/rain.mp3" type="audio/mpeg">
+</audio>
+
 <script>
 let workMinutes = 25;
 let breakMinutes = 5;
@@ -138,9 +144,12 @@ let timeLeft = workMinutes * 60;
 let running = false;
 let isWork = true;
 let interval;
+let rainOn = false;
 
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("startBtn");
+const rainBtn = document.getElementById("rainBtn");
+const rainAudio = document.getElementById("rainAudio");
 
 const tabWork = document.getElementById("tab-work");
 const tabBreak = document.getElementById("tab-break");
@@ -174,16 +183,19 @@ startBtn.onclick = () => {
     interval = setInterval(() => {
       timeLeft--;
       updateTime();
-
-      if (timeLeft <= 0) {
-        switchMode(!isWork);
-      }
+      if (timeLeft <= 0) switchMode(!isWork);
     }, 1000);
   } else {
     running = false;
     clearInterval(interval);
     startBtn.textContent = "START";
   }
+};
+
+rainBtn.onclick = () => {
+  rainOn = !rainOn;
+  rainOn ? rainAudio.play() : rainAudio.pause();
+  rainBtn.textContent = rainOn ? "🌧️ Yağmur Kapat" : "🌧️ Yağmur Aç";
 };
 
 tabWork.onclick = () => switchMode(true);
@@ -200,29 +212,7 @@ breakInput.onchange = () => {
 };
 
 updateTime();
-
-  ...
-<footer>
-  © 2025 Yavaş Ama İleri
-</footer>
-
-<!-- 👇 YAĞMUR SESİ BURAYA -->
-<audio id="rainAudio" loop>
-  <source src="sounds/rain.mp3" type="audio/mpeg">
-</audio>
-
-</body>
-</html>
-<div class="controls">
-  <button id="startBtn">START</button>
-
-  <button id="rainBtn">🌧️ Yağmur Aç</button>
-</div>
-
 </script>
-<audio id="rainAudio" loop>
-  <source src="sounds/rain.mp3" type="audio/mpeg">
-</audio>
 
 </body>
 </html>
