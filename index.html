@@ -138,6 +138,7 @@ button {
 </div>
 
 <script>
+<script>
 let workMinutes = 25;
 let breakMinutes = 5;
 let timeLeft = workMinutes * 60;
@@ -146,10 +147,14 @@ let isWork = true;
 let interval;
 let rainOn = false;
 
-/* ✅ DOĞRU SES YOLU */
+/* 🌧️ YAĞMUR SESİ */
 const rainAudio = new Audio("rain.mp3");
 rainAudio.loop = true;
 rainAudio.volume = 0.6;
+
+/* 🔔 ZİL SESİ */
+const bellAudio = new Audio("bell.mp3");
+bellAudio.volume = 0.8;
 
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("startBtn");
@@ -187,7 +192,12 @@ startBtn.onclick = () => {
     interval = setInterval(() => {
       timeLeft--;
       updateTime();
-      if (timeLeft <= 0) switchMode(!isWork);
+
+      if (timeLeft <= 0) {
+        bellAudio.currentTime = 0;
+        bellAudio.play();     // 🔔 ZİL ÇALAR
+        switchMode(!isWork);
+      }
     }, 1000);
   } else {
     running = false;
@@ -226,6 +236,8 @@ breakInput.onchange = () => {
 };
 
 updateTime();
+</script>
+
 </script>
 
 </body>
