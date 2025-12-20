@@ -2,44 +2,94 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Skor Tablosu</title>
+<title>Yavaş Ama İleri – Skor Tablosu</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+:root {
+  --yellow:#f5c400; --dark:#000; --card:#111; --soft:#1a1a1a;
+}
+*{box-sizing:border-box}
 body{
-  margin:0;background:#000;color:#f5c400;
+  margin:0;background:var(--dark);color:var(--yellow);
   font-family:system-ui,sans-serif;
-  display:flex;justify-content:center;align-items:center;
-  height:100vh
+  min-height:100vh;display:flex;justify-content:center;
+}
+.container{
+  width:360px;margin-top:40px;
 }
 .card{
-  background:#111;padding:30px;border-radius:18px;
-  width:320px;text-align:center
+  background:var(--card);
+  border-radius:18px;padding:20px;
+}
+h1{
+  font-size:20px;text-align:center;margin-bottom:16px;
+}
+.row{
+  display:flex;justify-content:space-between;
+  padding:10px;border-radius:8px;
+  margin-bottom:8px;background:var(--soft);
+}
+.row.me{
+  background:var(--yellow);color:#000;font-weight:600;
+}
+.rank{width:30px}
+.name{flex:1}
+.score{width:60px;text-align:right}
+a{
+  display:block;text-align:center;
+  margin-top:20px;color:var(--yellow);
+  text-decoration:none;
 }
 </style>
 </head>
+
 <body>
 
-<div class="card">
-  <h2>🏆 Skor Tablosu</h2>
-  <p id="user"></p>
-  <p id="score"></p>
-  <p id="badge"></p>
-  <a href="index.html" style="color:#f5c400">← Geri</a>
+<div class="container">
+  <div class="card">
+    <h1>🏆 Skor Tablosu</h1>
+    <div id="list"></div>
+  </div>
+
+  <a href="index.html">← Pomodoro’ya Dön</a>
 </div>
 
 <script>
-const u=localStorage.getItem("username");
-const s=localStorage.getItem("score")||0;
-const p=localStorage.getItem("pomos")||0;
+const listEl = document.getElementById("list");
 
-let badge="Başlangıç";
-if(p>=4) badge="Uzman";
-if(p>=10) badge="Usta";
+/* 🔐 mevcut kullanıcı */
+const myName = localStorage.getItem("username");
+const myScore = Number(localStorage.getItem("score")) || 0;
 
-document.getElementById("user").textContent="👤 "+u;
-document.getElementById("score").textContent="⭐ Puan: "+s;
-document.getElementById("badge").textContent="🎖️ Rozet: "+badge;
+/* 📊 tabloyu tut */
+let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+
+/* kullanıcıyı ekle / güncelle */
+const existing = leaderboard.find(u => u.name === myName);
+if(existing){
+  existing.score = myScore;
+}else{
+  leaderboard.push({name: myName, score: myScore});
+}
+
+/* yüksekten düşüğe sırala */
+leaderboard.sort((a,b)=>b.score-a.score);
+
+/* kaydet */
+localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+
+/* ekrana bas */
+leaderboard.forEach((u,i)=>{
+  const row = document.createElement("div");
+  row.className = "row" + (u.name === myName ? " me" : "");
+  row.innerHTML = `
+    <div class="rank">${i+1}</div>
+    <div class="name">${u.name}</div>
+    <div class="score">${u.score}</div>
+  `;
+  listEl.appendChild(row);
+});
 </script>
 
 </body>
