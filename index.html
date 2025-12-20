@@ -222,6 +222,162 @@ function copyLink(){
 
 renderTasks();updateTime();
 </script>
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-firestore.js";
+
+/* 🔥 FIREBASE */
+const firebaseConfig = {
+  apiKey: "AIzaSyCDD8SkEVpDLFGpHtUozovyBM2XuuZHs18",
+  authDomain: "yavas-ama-ileri.firebaseapp.com",
+  projectId: "yavas-ama-ileri",
+  storageBucket: "yavas-ama-ileri.firebasestorage.app",
+  messagingSenderId: "375260128218",
+  appId: "1:375260128218:web:10f140a93e4902c90756e3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* 👤 USER */
+let username = localStorage.getItem("username");
+if(!username){
+  username = prompt("Kullanıcı adın?");
+  localStorage.setItem("username", username);
+}
+
+/* 🌧️ YAĞMUR */
+const rainAudio=document.getElementById("rainAudio");
+let rainOn=false;
+
+/* ⏱️ TIMER */
+let workMin=25, breakMin=5;
+let timeLeft=1500,isWork=true,running=false,interval;
+
+/* 🎯 SCORE */
+let score=Number(localStorage.getItem("score"))||0;
+let pomos=Number(localStorage.getItem("pomos"))||0;
+
+/* 📝 TASKS */
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+
+/* DOM */
+const timeEl=document.getElementById("time");
+const startBtn=document.getElementById("startBtn");
+const rainBtn=document.getElementById("rainBtn");
+const tabWork=document.getElementById("tabWork");
+const tabBreak=document.getElementById("tabBreak");
+const taskInput=document.getElementById("taskInput");
+const addTaskBtn=document.getElementById("addTaskBtn");
+const taskSelect=document.getElementById("taskSelect");
+const workInput=document.getElementById("workInput");
+const breakInput=document.getElementById("breakInput");
+
+function updateTime(){
+  const m=String(Math.floor(timeLeft/60)).padStart(2,"0");
+  const s=String(timeLeft%60).padStart(2,"0");
+  timeEl.textContent=`${m}:${s}`;
+}
+
+function renderTasks(){
+  taskSelect.innerHTML='<option value="">Görev seç</option>';
+  tasks.forEach((t,i)=>{
+    const o=document.createElement("option");
+    o.value=i;
+    o.textContent=`${t.name} (${t.count||0})`;
+    taskSelect.appendChild(o);
+  });
+}
+
+addTaskBtn.onclick=()=>{
+  if(!taskInput.value)return;
+  tasks.push({name:taskInput.value,count:0});
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+  taskInput.value="";
+  renderTasks();
+};
+
+function switchMode(work){
+  isWork=work;
+  running=false;
+  clearInterval(interval);
+  tabWork.classList.toggle("active",work);
+  tabBreak.classList.toggle("active",!work);
+  timeLeft=(work?workMin:breakMin)*60;
+  startBtn.textContent="START";
+  updateTime();
+}
+
+/* 🔥 POMODORO BİTİNCE */
+async function finishPomodoro(){
+  pomos++;
+  score+=10;
+
+  localStorage.setItem("pomos",pomos);
+  localStorage.setItem("score",score);
+
+  await addDoc(collection(db,"scores"),{
+    name: username,
+    score: score,
+    pomos: pomos,
+    createdAt: Date.now()
+  });
+}
+
+startBtn.onclick=()=>{
+  if(!running){
+    running=true;
+    startBtn.textContent="PAUSE";
+    interval=setInterval(async ()=>{
+      timeLeft--;
+      updateTime();
+
+      if(timeLeft<=0){
+        await finishPomodoro();
+
+        if(taskSelect.value!==""){
+          tasks[taskSelect.value].count++;
+          localStorage.setItem("tasks",JSON.stringify(tasks));
+          renderTasks();
+        }
+
+        switchMode(!isWork);
+      }
+    },1000);
+  }else{
+    running=false;
+    clearInterval(interval);
+    startBtn.textContent="START";
+  }
+};
+
+rainBtn.onclick=()=>{
+  if(!rainOn){
+    rainAudio.currentTime=0;
+    rainAudio.play();
+    rainOn=true;
+    rainBtn.textContent="🌧️ Yağmur Kapat";
+  }else{
+    rainAudio.pause();
+    rainOn=false;
+    rainBtn.textContent="🌧️ Yağmur Aç";
+  }
+};
+
+tabWork.onclick=()=>switchMode(true);
+tabBreak.onclick=()=>switchMode(false);
+workInput.onchange=()=>{workMin=workInput.value;switchMode(true)};
+breakInput.onchange=()=>{breakMin=breakInput.value;switchMode(false)};
+
+function copyLink(){
+  navigator.clipboard.writeText(location.href);
+  alert("Link kopyalandı!");
+}
+
+renderTasks();
+updateTime();
+</script>
+
 
 </body>
 </html>
