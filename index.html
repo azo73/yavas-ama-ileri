@@ -115,6 +115,28 @@
 <footer>© 2025 Yavaş Ama İleri</footer>
 
 <script>
+  const workLabel = document.getElementById("workLabel");
+const breakLabel = document.getElementById("breakLabel");
+
+function updateLabels() {
+  workLabel.textContent = workMinutes + " dk";
+  breakLabel.textContent = breakMinutes + " dk";
+}
+
+function changeWork(val) {
+  if (running) return;
+  workMinutes = Math.max(5, workMinutes + val);
+  timeLeft = workMinutes * 60;
+  updateTimer();
+  updateLabels();
+}
+
+function changeBreak(val) {
+  if (running) return;
+  breakMinutes = Math.max(1, breakMinutes + val);
+  updateLabels();
+}
+
   let workMinutes = 25;
 let breakMinutes = 5;
 
