@@ -34,10 +34,11 @@ body {
   text-align: center;
 }
 
+/* Tabs */
 .tabs {
   display: flex;
   gap: 8px;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .tab {
@@ -56,12 +57,23 @@ body {
   opacity: 1;
 }
 
+/* Time */
 #time {
   font-size: 72px;
   font-weight: 700;
-  margin: 25px 0;
+  margin: 18px 0 10px;
 }
 
+/* Quote */
+.quote {
+  font-size: clamp(13px, 3.5vw, 16px);
+  line-height: 1.6;
+  color: rgba(245,196,0,0.75);
+  font-style: italic;
+  margin-bottom: 18px;
+}
+
+/* Buttons */
 button {
   width: 100%;
   padding: 14px 0;
@@ -75,8 +87,9 @@ button {
   margin-top: 10px;
 }
 
+/* Settings */
 .settings {
-  margin-top: 25px;
+  margin-top: 22px;
   text-align: left;
   font-size: 14px;
 }
@@ -114,6 +127,10 @@ button {
 
   <div id="time">25:00</div>
 
+  <div class="quote">
+    “Mücadele edenler her zaman kazanamazlar ancak kazananlar her zaman mücadele edenlerdir.”
+  </div>
+
   <button id="startBtn">START</button>
   <button id="rainBtn">🌧️ Yağmur Aç</button>
 
@@ -137,7 +154,6 @@ button {
   </div>
 </div>
 
-<script>
 <script>
 let workMinutes = 25;
 let breakMinutes = 5;
@@ -195,7 +211,7 @@ startBtn.onclick = () => {
 
       if (timeLeft <= 0) {
         bellAudio.currentTime = 0;
-        bellAudio.play();     // 🔔 ZİL ÇALAR
+        bellAudio.play();
         switchMode(!isWork);
       }
     }, 1000);
@@ -236,8 +252,6 @@ breakInput.onchange = () => {
 };
 
 updateTime();
-</script>
-
 </script>
 
 </body>
