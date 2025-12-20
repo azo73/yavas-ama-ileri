@@ -1,40 +1,19 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta name="google-adsense-account" content="ca-pub-5935458968037999">
-  <meta charset="UTF-8" />
-   <title>Yavaş Ama İleri</title>
+  <meta charset="UTF-8">
+  <title>Yavaş Ama İleri</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- AdSense (yer doğru) -->
+  <meta name="google-adsense-account" content="ca-pub-5935458968037999">
+
   <style>
-    #pomodoro {
-  margin-top: 30px;
-}
-
-#pomo-time {
-  font-size: 28px;
-  margin-bottom: 12px;
-  opacity: 0.9;
-}
-
-#pomo-btn {
-  background: none;
-  border: 1px solid rgba(255,255,255,0.4);
-  color: #f3f3f3;
-  padding: 8px 18px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-#pomo-btn:hover {
-  opacity: 0.8;
-}
-
     body {
       margin: 0;
       height: 100vh;
-      background: yellow;
-      color: red;
+      background: #000000;
+      color: #FFD700;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -43,149 +22,120 @@
     }
 
     .container {
-      max-width: 340px;
-      padding: 20px;
+      max-width: 420px;
+      padding: 24px;
     }
 
-    #time {
-      font-size: 36px;
-      margin-bottom: 24px;
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
       letter-spacing: 1px;
-      opacity: 0.9;
     }
 
-    #message {
-      font-size: 17px;
-      line-height: 1.6;
-      opacity: 0.75;
-      transition: opacity 1s;
+    #timer {
+      font-size: 64px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+
+    #status {
+      font-size: 18px;
+      margin-bottom: 30px;
+      opacity: 0.85;
+    }
+
+    button {
+      background: none;
+      border: 2px solid #FFD700;
+      color: #FFD700;
+      padding: 12px 28px;
+      font-size: 18px;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 12px;
+      width: 100%;
+      font-size: 12px;
+      opacity: 0.5;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div id="pomodoro">
-  <div id="pomo-time">25:00</div>
-  <button id="pomo-btn">Başla</button>
+  <h1>Yavaş Ama İleri</h1>
+
+  <div id="timer">25:00</div>
+  <div id="status">Odak zamanı</div>
+
+  <button id="controlBtn">Başla</button>
 </div>
 
-  <div id="time">00:00</div>
-  <div id="message">Buradasın. Bu da bir başlangıç.</div>
-</div>
+<footer>© 2025 Yavaş Ama İleri</footer>
 
 <script>
-  let seconds = 0;
+  const WORK_TIME = 25 * 60;
+  const BREAK_TIME = 5 * 60;
 
-  function pick(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-  }
-
-  function getMessage(seconds) {
-    if (seconds < 30) {
-      return pick([
-        "Buradasın. Bu da bir başlangıç.",
-        "Durmak da bir harekettir.",
-        "Şu an kendine denk geldin.",
-        "Kimse senden hız istemiyor."
-      ]);
-    } 
-    else if (seconds < 60) {
-      return pick([
-        "Bir dakika geçti… fark ettin mi?",
-        "Bu sessizlik sana iyi geliyor olabilir.",
-        "Zaman akıyor ama sen kaçmıyorsun.",
-        "Burada olman tesadüf değil."
-      ]);
-    } 
-    else if (seconds < 120) {
-      return pick([
-        "İstersen şimdi çıkıp küçük bir şey başlatabilirsin.",
-        "Mükemmel olmak zorunda değilsin.",
-        "Küçük bir adım hâlâ adımdır.",
-        "Başlayanlar, bir noktada karar verir."
-      ]);
-    } 
-    else if (seconds < 180) {
-      return pick([
-        "Buraya kadar geldiysen, sandığından güçlüsün.",
-        "Hazır hissetmeden de başlanır.",
-        "Ertelediğin şey, düşündüğünden küçük olabilir.",
-        "Bu senin temposun."
-      ]);
-    } 
-    else {
-      return pick([
-        "Artık çıkabilirsin. Ya da biraz daha nefes alabilirsin.",
-        "Bugün bir şey değişecekse, buradan sonra.",
-        "Kendin için ayırdığın bu zaman boşa değil.",
-        "Hadi. Küçük ama gerçek bir adım."
-      ]);
-    }
-  }
-
-  setInterval(() => {
-    seconds++;
-
-    const min = String(Math.floor(seconds / 60)).padStart(2, '0');
-    const sec = String(seconds % 60).padStart(2, '0');
-    document.getElementById("time").textContent = `${min}:${sec}`;
-
-    if (seconds % 15 === 0) {
-      const messageEl = document.getElementById("message");
-      messageEl.style.opacity = 0;
-
-      setTimeout(() => {
-        messageEl.textContent = getMessage(seconds);
-        messageEl.style.opacity = 0.75;
-      }, 500);
-    }
-  }, 1000);
-</script>
-  <script>
-  let pomoSeconds = 25 * 60;
-  let pomoInterval = null;
+  let timeLeft = WORK_TIME;
+  let isWorking = true;
+  let interval = null;
   let running = false;
 
-  const pomoTimeEl = document.getElementById("pomo-time");
-  const pomoBtn = document.getElementById("pomo-btn");
+  const timerEl = document.getElementById("timer");
+  const statusEl = document.getElementById("status");
+  const btn = document.getElementById("controlBtn");
 
-  function updatePomo() {
-    const m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
-    const s = String(pomoSeconds % 60).padStart(2, '0');
-    pomoTimeEl.textContent = `${m}:${s}`;
+  function updateTimer() {
+    const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+    const s = String(timeLeft % 60).padStart(2, '0');
+    timerEl.textContent = `${m}:${s}`;
   }
 
-  pomoBtn.addEventListener("click", () => {
+  function switchMode() {
+    if (isWorking) {
+      isWorking = false;
+      timeLeft = BREAK_TIME;
+      statusEl.textContent = "Mola zamanı ☕";
+    } else {
+      isWorking = true;
+      timeLeft = WORK_TIME;
+      statusEl.textContent = "Odak zamanı";
+    }
+  }
+
+  btn.addEventListener("click", () => {
     if (!running) {
       running = true;
-      pomoBtn.textContent = "Durdur";
-      pomoInterval = setInterval(() => {
-        pomoSeconds--;
-        updatePomo();
+      btn.textContent = "Duraklat";
 
-        if (pomoSeconds <= 0) {
-          clearInterval(pomoInterval);
-          pomoTimeEl.textContent = "Mola zamanı ☕";
-          pomoBtn.textContent = "Tekrar Başla";
-          pomoSeconds = 25 * 60;
-          running = false;
+      interval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+
+        if (timeLeft <= 0) {
+          switchMode();
+          updateTimer();
         }
       }, 1000);
+
     } else {
-      clearInterval(pomoInterval);
-      pomoBtn.textContent = "Devam";
       running = false;
+      btn.textContent = "Devam";
+      clearInterval(interval);
     }
   });
 
-  updatePomo();
+  updateTimer();
 </script>
-
-  <footer style="position:fixed;bottom:10px;width:100%;font-size:12px;opacity:0.4;">
-  © 2025 Yavaş Ama İleri
-</footer>
-
 
 </body>
 </html>
