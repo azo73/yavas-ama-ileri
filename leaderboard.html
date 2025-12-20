@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Skor Tablosu</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;background:#000;color:#f5c400;
+  font-family:system-ui,sans-serif;
+  display:flex;justify-content:center;align-items:center;
+  height:100vh
+}
+.card{
+  background:#111;padding:30px;border-radius:18px;
+  width:320px;text-align:center
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>🏆 Skor Tablosu</h2>
+  <p id="user"></p>
+  <p id="score"></p>
+  <p id="badge"></p>
+  <a href="index.html" style="color:#f5c400">← Geri</a>
+</div>
+
+<script>
+const u=localStorage.getItem("username");
+const s=localStorage.getItem("score")||0;
+const p=localStorage.getItem("pomos")||0;
+
+let badge="Başlangıç";
+if(p>=4) badge="Uzman";
+if(p>=10) badge="Usta";
+
+document.getElementById("user").textContent="👤 "+u;
+document.getElementById("score").textContent="⭐ Puan: "+s;
+document.getElementById("badge").textContent="🎖️ Rozet: "+badge;
+</script>
+
+</body>
+</html>
