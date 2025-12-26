@@ -1,138 +1,219 @@
-<script>
-/* 👤 USER */
-let username = localStorage.getItem("username");
-if(!username){
-  username = "guest_" + Math.floor(Math.random()*10000);
-  localStorage.setItem("username", username);
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Yavaş Ama İleri – Pomodoro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --yellow:#f5c400;
+  --dark:#000;
+  --card:#111;
+  --soft:#1a1a1a;
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--dark);
+  color:var(--yellow);
+  font-family:system-ui,sans-serif;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-/* 🌧️ YAĞMUR */
-const rainAudio = document.getElementById("rainAudio");
-let rainOn = false;
+.app{
+  width:520px;
+  max-width:95vw;
+  background:var(--card);
+  padding:40px;
+  border-radius:24px;
+  text-align:center;
+}
 
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+.tab{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  background:var(--soft);
+  opacity:.5;
+  cursor:pointer;
+}
+.tab.active{
+  background:var(--yellow);
+  color:#000;
+  opacity:1;
+}
+
+#time{
+  font-size:96px;
+  font-weight:800;
+  margin:20px 0;
+}
+
+.quote{
+  font-size:14px;
+  opacity:.7;
+  font-style:italic;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  margin-top:12px;
+  background:var(--yellow);
+  color:#000;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.settings{
+  text-align:left;
+  margin-top:25px;
+  font-size:14px;
+}
+.setting-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:10px;
+}
+input{
+  width:80px;
+  background:#222;
+  color:var(--yellow);
+  border:none;
+  border-radius:6px;
+  padding:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="tabs">
+    <div class="tab active" id="tabWork">Pomodoro</div>
+    <div class="tab" id="tabBreak">Short Break</div>
+  </div>
+
+  <div id="time">25:00</div>
+
+  <div class="quote">
+    “Kazananlar vazgeçmeyenlerdir.”
+  </div>
+
+  <button id="startBtn">START</button>
+  <button id="rainBtn">🌧️ Yağmur Aç</button>
+
+  <div class="settings">
+    <div class="setting-row">
+      <span>Çalışma (dk)</span>
+      <input type="number" id="workInput" value="25">
+    </div>
+    <div class="setting-row">
+      <span>Short Break (dk)</span>
+      <input type="number" id="breakInput" value="5">
+    </div>
+  </div>
+
+</div>
+
+<audio id="rainAudio" loop>
+  <source src="rain.mp3" type="audio/mpeg">
+</audio>
+
+<script>
 /* ⏱️ TIMER */
 let workMin = 25;
 let breakMin = 5;
 let timeLeft = workMin * 60;
-let isWork = true;
 let running = false;
 let interval = null;
 
-/* 🎯 SCORE */
-let score = Number(localStorage.getItem("score")) || 0;
-let pomos = Number(localStorage.getItem("pomos")) || 0;
-
-/* 📝 TASKS */
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+/* MODE (sadece görünüm) */
+let viewMode = "work";
 
 /* DOM */
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("startBtn");
-const rainBtn = document.getElementById("rainBtn");
 const tabWork = document.getElementById("tabWork");
 const tabBreak = document.getElementById("tabBreak");
-const taskInput = document.getElementById("taskInput");
-const addTaskBtn = document.getElementById("addTaskBtn");
-const taskSelect = document.getElementById("taskSelect");
 const workInput = document.getElementById("workInput");
 const breakInput = document.getElementById("breakInput");
 
-/* ⏱️ */
+/* 🌧️ */
+const rainAudio = document.getElementById("rainAudio");
+const rainBtn = document.getElementById("rainBtn");
+let rainOn = false;
+
 function updateTime(){
   const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
   const s = String(timeLeft%60).padStart(2,"0");
   timeEl.textContent = `${m}:${s}`;
 }
 
-/* 📝 */
-function renderTasks(){
-  taskSelect.innerHTML = '<option value="">Görev seç</option>';
-  tasks.forEach((t,i)=>{
-    const o = document.createElement("option");
-    o.value=i;
-    o.textContent=`${t.name} (${t.count||0})`;
-    taskSelect.appendChild(o);
-  });
+function startTimer(){
+  if(running) return;
+  running = true;
+  startBtn.textContent = "PAUSE";
+
+  interval = setInterval(()=>{
+    timeLeft--;
+    updateTime();
+
+    if(timeLeft <= 0){
+      timeLeft = workMin * 60;
+    }
+  },1000);
 }
 
-/* ➕ */
-addTaskBtn.onclick = () => {
-  if(!taskInput.value) return;
-  tasks.push({name:taskInput.value,count:0});
-  localStorage.setItem("tasks",JSON.stringify(tasks));
-  taskInput.value="";
-  renderTasks();
+function pauseTimer(){
+  running = false;
+  clearInterval(interval);
+  startBtn.textContent = "START";
+}
+
+/* BUTON */
+startBtn.onclick = ()=>{
+  running ? pauseTimer() : startTimer();
 };
 
-/* ▶️ */
-startBtn.onclick = () => {
-  if(!running){
-    running = true;
-    startBtn.textContent = "PAUSE";
-
-    interval = setInterval(()=>{
-      timeLeft--;
-      updateTime();
-
-      if(timeLeft <= 0){
-        if(isWork){
-          pomos++;
-          score += 10;
-          localStorage.setItem("pomos", pomos);
-          localStorage.setItem("score", score);
-
-          if(taskSelect.value!==""){
-            tasks[taskSelect.value].count++;
-            localStorage.setItem("tasks",JSON.stringify(tasks));
-            renderTasks();
-          }
-        }
-
-        isWork = !isWork;
-        timeLeft = (isWork ? workMin : breakMin) * 60;
-        updateTime();
-      }
-    },1000);
-  }else{
-    running = false;
-    clearInterval(interval);
-    startBtn.textContent = "START";
-  }
-};
-
-/* 🌧️ */
-rainBtn.onclick = () => {
-  if(!rainOn){
-    rainAudio.play();
-    rainBtn.textContent = "🌧️ Yağmur Kapat";
-  }else{
-    rainAudio.pause();
-    rainBtn.textContent = "🌧️ Yağmur Aç";
-  }
-  rainOn = !rainOn;
-};
-
-/* 🧭 TABLAR – SADECE GÖRÜNÜM */
-tabWork.onclick = () => {
+/* TABLAR — TIMER DURMAZ */
+tabWork.onclick = ()=>{
+  viewMode="work";
   tabWork.classList.add("active");
   tabBreak.classList.remove("active");
 };
 
-tabBreak.onclick = () => {
+tabBreak.onclick = ()=>{
+  viewMode="break";
   tabBreak.classList.add("active");
   tabWork.classList.remove("active");
 };
 
-/* ⚙️ */
-workInput.onchange = ()=> workMin = Number(workInput.value);
-breakInput.onchange = ()=> breakMin = Number(breakInput.value);
+/* INPUT */
+workInput.onchange = ()=>{
+  workMin = Number(workInput.value);
+  if(!running){
+    timeLeft = workMin * 60;
+    updateTime();
+  }
+};
 
-/* 🔗 */
-function copyLink(){
-  navigator.clipboard.writeText(location.href);
-  alert("Link kopyalandı!");
-}
+breakInput.onchange = ()=>{
+  breakMin = Number(breakInput.value);
+};
 
-renderTasks();
-updateTime();
-</script>
+/*
