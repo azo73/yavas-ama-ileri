@@ -59,12 +59,6 @@ body{
   margin:20px 0;
 }
 
-.quote{
-  font-size:14px;
-  opacity:.7;
-  font-style:italic;
-}
-
 button{
   width:100%;
   padding:14px;
@@ -75,26 +69,6 @@ button{
   color:#000;
   font-weight:700;
   cursor:pointer;
-}
-
-.settings{
-  text-align:left;
-  margin-top:25px;
-  font-size:14px;
-}
-.setting-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:10px;
-}
-input{
-  width:80px;
-  background:#222;
-  color:var(--yellow);
-  border:none;
-  border-radius:6px;
-  padding:6px;
 }
 </style>
 </head>
@@ -110,23 +84,8 @@ input{
 
   <div id="time">25:00</div>
 
-  <div class="quote">
-    “Kazananlar vazgeçmeyenlerdir.”
-  </div>
-
   <button id="startBtn">START</button>
   <button id="rainBtn">🌧️ Yağmur Aç</button>
-
-  <div class="settings">
-    <div class="setting-row">
-      <span>Çalışma (dk)</span>
-      <input type="number" id="workInput" value="25">
-    </div>
-    <div class="setting-row">
-      <span>Short Break (dk)</span>
-      <input type="number" id="breakInput" value="5">
-    </div>
-  </div>
 
 </div>
 
@@ -135,98 +94,85 @@ input{
 </audio>
 
 <script>
-let workMin = 25;
-let breakMin = 5;
-let timeLeft = workMin * 60;
+/* ⏱️ AYRI SAYAÇLAR */
+let workSeconds = 25 * 60;
+let breakSeconds = 5 * 60;
+
 let running = false;
 let interval = null;
-
-/* sadece görünüm */
-let viewMode = "work";
+let view = "work"; // sadece ekran
 
 /* DOM */
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("startBtn");
 const tabWork = document.getElementById("tabWork");
 const tabBreak = document.getElementById("tabBreak");
-const workInput = document.getElementById("workInput");
-const breakInput = document.getElementById("breakInput");
 
 /* 🌧️ */
 const rainAudio = document.getElementById("rainAudio");
 const rainBtn = document.getElementById("rainBtn");
 let rainOn = false;
 
-function updateTime(){
-  const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
-  const s = String(timeLeft%60).padStart(2,"0");
-  timeEl.textContent = `${m}:${s}`;
+/* FORMAT */
+function format(sec){
+  const m = String(Math.floor(sec/60)).padStart(2,"0");
+  const s = String(sec%60).padStart(2,"0");
+  return `${m}:${s}`;
 }
 
-function startTimer(){
+/* EKRAN */
+function render(){
+  timeEl.textContent =
+    view === "work"
+      ? format(workSeconds)
+      : format(breakSeconds);
+}
+
+/* TIMER */
+function start(){
   if(running) return;
   running = true;
   startBtn.textContent = "PAUSE";
 
   interval = setInterval(()=>{
-    timeLeft--;
-    updateTime();
+    if(workSeconds > 0) workSeconds--;
+    if(breakSeconds > 0) breakSeconds--;
 
-    if(timeLeft <= 0){
-      timeLeft = workMin * 60;
-    }
+    render();
   },1000);
 }
 
-function pauseTimer(){
+function pause(){
   running = false;
   clearInterval(interval);
   startBtn.textContent = "START";
 }
 
-startBtn.onclick = ()=>{
-  running ? pauseTimer() : startTimer();
-};
+startBtn.onclick = ()=> running ? pause() : start();
 
 /* TABLAR — TIMER DURMAZ */
 tabWork.onclick = ()=>{
-  viewMode="work";
+  view = "work";
   tabWork.classList.add("active");
   tabBreak.classList.remove("active");
+  render();
 };
 
 tabBreak.onclick = ()=>{
-  viewMode="break";
+  view = "break";
   tabBreak.classList.add("active");
   tabWork.classList.remove("active");
+  render();
 };
 
-/* INPUT */
-workInput.onchange = ()=>{
-  workMin = Number(workInput.value);
-  if(!running){
-    timeLeft = workMin * 60;
-    updateTime();
-  }
-};
-
-breakInput.onchange = ()=>{
-  breakMin = Number(breakInput.value);
-};
-
-/* YAĞMUR */
+/* 🌧️ */
 rainBtn.onclick = ()=>{
-  if(!rainOn){
-    rainAudio.play();
-    rainBtn.textContent="🌧️ Yağmur Kapat";
-  }else{
-    rainAudio.pause();
-    rainBtn.textContent="🌧️ Yağmur Aç";
-  }
-  rainOn=!rainOn;
+  rainOn ? rainAudio.pause() : rainAudio.play();
+  rainOn = !rainOn;
+  rainBtn.textContent = rainOn ? "🌧️ Yağmur Kapat" : "🌧️ Yağmur Aç";
 };
 
-updateTime();
+render();
 </script>
 
 </body>
