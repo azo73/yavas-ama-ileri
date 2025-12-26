@@ -123,10 +123,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* 👤 USER */
+/* 👤 USER – BLOKLAYICI YOK */
 let username = localStorage.getItem("username");
 if(!username){
-  username = prompt("Kullanıcı adın?");
+  username = "guest_" + Math.floor(Math.random()*10000);
   localStorage.setItem("username", username);
 }
 
@@ -193,27 +193,34 @@ function switchMode(work){
   updateTime();
 }
 
-async function finishPomodoro(){
+function finishPomodoro(){
   pomos++; score+=10;
   localStorage.setItem("pomos",pomos);
   localStorage.setItem("score",score);
 
-  await addDoc(collection(db,"scores"),{
-    name:username,
-    score,
-    pomos,
-    createdAt:Date.now()
-  });
+  try{
+    addDoc(collection(db,"scores"),{
+      name:username,
+      score,
+      pomos,
+      createdAt:Date.now()
+    });
+  }catch(e){
+    console.warn("Firebase hata aldı ama site çalışıyor");
+  }
 }
 
 startBtn.onclick=()=>{
   if(!running){
     running=true;
     startBtn.textContent="PAUSE";
-    interval=setInterval(async()=>{
+    interval=setInterval(()=>{
       timeLeft--; updateTime();
       if(timeLeft<=0){
-        await finishPomodoro();
+        clearInterval(interval);
+        running=false;
+        finishPomodoro();
+
         if(taskSelect.value!==""){
           tasks[taskSelect.value].count++;
           localStorage.setItem("tasks",JSON.stringify(tasks));
