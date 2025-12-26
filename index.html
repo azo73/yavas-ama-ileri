@@ -22,14 +22,14 @@ body{
   font-family:system-ui,sans-serif;
   min-height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
 }
 
-/* 🖥️ PC İÇİN BÜYÜK KART */
+/* 🖥️ PC için büyük alan */
 .app{
-  width:520px;
-  max-width:95%;
+  width:90vw;
+  max-width:700px;
   background:var(--card);
   padding:40px;
   border-radius:24px;
@@ -44,24 +44,22 @@ body{
 
 .tab{
   flex:1;
-  padding:14px;
+  padding:12px;
   border-radius:12px;
   background:var(--soft);
   opacity:.6;
   cursor:pointer;
-  font-size:16px;
+  font-size:18px;
 }
 
 .tab.active{
   background:var(--yellow);
   color:#000;
   opacity:1;
-  font-weight:600;
 }
 
-/* ⏱️ DEV TIMER */
 #time{
-  font-size:96px;
+  font-size:110px;
   font-weight:800;
   margin:30px 0;
 }
@@ -70,7 +68,7 @@ body{
   font-size:15px;
   opacity:.75;
   font-style:italic;
-  margin-bottom:20px;
+  margin-bottom:24px;
 }
 
 button{
@@ -82,13 +80,13 @@ button{
   background:var(--yellow);
   color:#000;
   font-weight:700;
-  font-size:16px;
+  font-size:18px;
   cursor:pointer;
 }
 
 .settings{
   text-align:left;
-  margin-top:28px;
+  margin-top:30px;
   font-size:15px;
 }
 
@@ -96,7 +94,7 @@ button{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-top:14px;
+  margin-top:12px;
 }
 
 input,select{
@@ -105,16 +103,21 @@ input,select{
   border:none;
   border-radius:8px;
   padding:8px;
-  font-size:14px;
 }
 
 a{
   color:var(--yellow);
   text-decoration:none;
-  display:block;
-  text-align:center;
-  margin-top:20px;
-  font-size:15px;
+}
+
+#inviteBar{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  background:#111;
+  padding:12px 16px;
+  border-radius:14px;
+  font-size:14px;
 }
 </style>
 </head>
@@ -122,7 +125,6 @@ a{
 <body>
 
 <div class="app">
-
   <div class="tabs">
     <div class="tab active" id="tabWork">Pomodoro</div>
     <div class="tab" id="tabBreak">Short Break</div>
@@ -131,13 +133,14 @@ a{
   <div id="time">25:00</div>
 
   <div class="quote">
-    “Yavaş ilerle ama asla durma.”
+    “Kazananlar vazgeçmeyenlerdir.”
   </div>
 
   <button id="startBtn">START</button>
+  <button id="rainBtn">🌧️ Yağmur Aç</button>
 
   <div class="settings">
-    <strong>🎯 Bugün Ne Yapacağım?</strong>
+    <strong>Bugün Ne Yapacağım?</strong>
 
     <div class="setting-row">
       <input id="taskInput" placeholder="Görev ekle">
@@ -158,10 +161,21 @@ a{
       <input type="number" id="breakInput" value="5">
     </div>
 
-    <a href="leaderboard.html">🏆 Skor Tablosu</a>
+    <div style="margin-top:14px">
+      <a href="leaderboard.html">🏆 Skor Tablosu</a>
+    </div>
   </div>
-
 </div>
+
+<div id="inviteBar">
+  Arkadaşını davet et →
+  <button onclick="copyLink()">Linki Kopyala</button>
+</div>
+
+<!-- 🌧️ YAĞMUR SESİ -->
+<audio id="rainAudio" loop>
+  <source src="rain.mp3" type="audio/mpeg">
+</audio>
 
 <script>
 /* 👤 USER */
@@ -171,7 +185,11 @@ if(!username){
   localStorage.setItem("username", username);
 }
 
-/* ⏱️ TIMER */
+/* 🌧️ */
+const rainAudio = document.getElementById("rainAudio");
+let rainOn = false;
+
+/* ⏱️ */
 let workMin = 25;
 let breakMin = 5;
 let timeLeft = workMin * 60;
@@ -179,15 +197,16 @@ let isWork = true;
 let running = false;
 let interval;
 
-/* 🎯 SCORE */
+/* 🎯 */
 let score = Number(localStorage.getItem("score")) || 0;
 
-/* 📝 TASKS */
+/* 📝 */
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
 /* DOM */
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("startBtn");
+const rainBtn = document.getElementById("rainBtn");
 const tabWork = document.getElementById("tabWork");
 const tabBreak = document.getElementById("tabBreak");
 const taskInput = document.getElementById("taskInput");
@@ -226,8 +245,8 @@ function switchMode(work){
   clearInterval(interval);
   tabWork.classList.toggle("active",work);
   tabBreak.classList.toggle("active",!work);
-  timeLeft = (work ? workMin : breakMin) * 60;
-  startBtn.textContent = "START";
+  timeLeft = (work?workMin:breakMin)*60;
+  startBtn.textContent="START";
   updateTime();
 }
 
@@ -243,12 +262,6 @@ startBtn.onclick=()=>{
         running=false;
         score+=10;
         localStorage.setItem("score",score);
-
-        if(taskSelect.value!==""){
-          tasks[taskSelect.value].count++;
-          localStorage.setItem("tasks",JSON.stringify(tasks));
-          renderTasks();
-        }
         switchMode(!isWork);
       }
     },1000);
@@ -259,10 +272,26 @@ startBtn.onclick=()=>{
   }
 };
 
+rainBtn.onclick=()=>{
+  if(!rainOn){
+    rainAudio.play();
+    rainBtn.textContent="🌧️ Yağmur Kapat";
+  }else{
+    rainAudio.pause();
+    rainBtn.textContent="🌧️ Yağmur Aç";
+  }
+  rainOn=!rainOn;
+};
+
 tabWork.onclick=()=>switchMode(true);
 tabBreak.onclick=()=>switchMode(false);
 workInput.onchange=()=>{workMin=workInput.value;switchMode(true)};
 breakInput.onchange=()=>{breakMin=breakInput.value;switchMode(false)};
+
+function copyLink(){
+  navigator.clipboard.writeText(location.href);
+  alert("Link kopyalandı!");
+}
 
 renderTasks();
 updateTime();
