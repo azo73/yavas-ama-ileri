@@ -1,15 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Yavaş Ama İleri – Pomodoro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --yellow:#f5c400;
+  --dark:#000;
+  --card:#111;
+  --soft:#1a1a1a;
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--dark);
+  color:var(--yellow);
+  font-family:system-ui,sans-serif;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.app{
+  width:520px;
+  max-width:95vw;
+  background:var(--card);
+  padding:40px;
+  border-radius:24px;
+  text-align:center;
+}
+
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+.tab{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  background:var(--soft);
+  opacity:.5;
+  cursor:pointer;
+}
+.tab.active{
+  background:var(--yellow);
+  color:#000;
+  opacity:1;
+}
+
+#time{
+  font-size:96px;
+  font-weight:800;
+  margin:20px 0;
+}
+
+.quote{
+  font-size:14px;
+  opacity:.7;
+  font-style:italic;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  margin-top:12px;
+  background:var(--yellow);
+  color:#000;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.settings{
+  text-align:left;
+  margin-top:25px;
+  font-size:14px;
+}
+.setting-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:10px;
+}
+input{
+  width:80px;
+  background:#222;
+  color:var(--yellow);
+  border:none;
+  border-radius:6px;
+  padding:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="tabs">
+    <div class="tab active" id="tabWork">Pomodoro</div>
+    <div class="tab" id="tabBreak">Short Break</div>
+  </div>
+
+  <div id="time">25:00</div>
+
+  <div class="quote">
+    “Kazananlar vazgeçmeyenlerdir.”
+  </div>
+
+  <button id="startBtn">START</button>
+  <button id="rainBtn">🌧️ Yağmur Aç</button>
+
+  <div class="settings">
+    <div class="setting-row">
+      <span>Çalışma (dk)</span>
+      <input type="number" id="workInput" value="25">
+    </div>
+    <div class="setting-row">
+      <span>Short Break (dk)</span>
+      <input type="number" id="breakInput" value="5">
+    </div>
+  </div>
+
+</div>
+
+<audio id="rainAudio" loop>
+  <source src="rain.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-/* ⏱️ SÜRELER */
 let workMin = 25;
 let breakMin = 5;
-
-let workTimeLeft = workMin * 60;
-let breakTimeLeft = breakMin * 60;
-
+let timeLeft = workMin * 60;
 let running = false;
 let interval = null;
 
-/* HANGİSİ GÖRÜNÜYOR */
+/* sadece görünüm */
 let viewMode = "work";
 
 /* DOM */
@@ -20,40 +152,29 @@ const tabBreak = document.getElementById("tabBreak");
 const workInput = document.getElementById("workInput");
 const breakInput = document.getElementById("breakInput");
 
-/* 🌧️ YAĞMUR */
+/* 🌧️ */
 const rainAudio = document.getElementById("rainAudio");
 const rainBtn = document.getElementById("rainBtn");
 let rainOn = false;
 
-/* ⏱️ GÖSTERİM */
 function updateTime(){
-  const t = viewMode === "work" ? workTimeLeft : breakTimeLeft;
-  const m = String(Math.floor(t / 60)).padStart(2,"0");
-  const s = String(t % 60).padStart(2,"0");
+  const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
+  const s = String(timeLeft%60).padStart(2,"0");
   timeEl.textContent = `${m}:${s}`;
 }
 
-/* ▶️ TIMER */
 function startTimer(){
   if(running) return;
   running = true;
   startBtn.textContent = "PAUSE";
 
   interval = setInterval(()=>{
-    if(workTimeLeft > 0) workTimeLeft--;
-    if(breakTimeLeft > 0) breakTimeLeft--;
-
-    /* Pomodoro biterse resetle */
-    if(workTimeLeft <= 0){
-      workTimeLeft = workMin * 60;
-    }
-
-    /* Break biterse resetle */
-    if(breakTimeLeft <= 0){
-      breakTimeLeft = breakMin * 60;
-    }
-
+    timeLeft--;
     updateTime();
+
+    if(timeLeft <= 0){
+      timeLeft = workMin * 60;
+    }
   },1000);
 }
 
@@ -63,54 +184,50 @@ function pauseTimer(){
   startBtn.textContent = "START";
 }
 
-/* START / PAUSE */
 startBtn.onclick = ()=>{
   running ? pauseTimer() : startTimer();
 };
 
-/* TABLAR — TIMER ASLA DURMAZ */
+/* TABLAR — TIMER DURMAZ */
 tabWork.onclick = ()=>{
-  viewMode = "work";
+  viewMode="work";
   tabWork.classList.add("active");
   tabBreak.classList.remove("active");
-  updateTime();
 };
 
 tabBreak.onclick = ()=>{
-  viewMode = "break";
+  viewMode="break";
   tabBreak.classList.add("active");
   tabWork.classList.remove("active");
-  updateTime();
 };
 
-/* INPUTLAR */
+/* INPUT */
 workInput.onchange = ()=>{
   workMin = Number(workInput.value);
-  workTimeLeft = workMin * 60;
-  updateTime();
+  if(!running){
+    timeLeft = workMin * 60;
+    updateTime();
+  }
 };
 
 breakInput.onchange = ()=>{
   breakMin = Number(breakInput.value);
-  breakTimeLeft = breakMin * 60;
-  updateTime();
 };
 
-/* 🌧️ YAĞMUR */
+/* YAĞMUR */
 rainBtn.onclick = ()=>{
   if(!rainOn){
     rainAudio.play();
-    rainBtn.textContent = "🌧️ Yağmur Kapat";
+    rainBtn.textContent="🌧️ Yağmur Kapat";
   }else{
     rainAudio.pause();
-    rainBtn.textContent = "🌧️ Yağmur Aç";
+    rainBtn.textContent="🌧️ Yağmur Aç";
   }
-  rainOn = !rainOn;
+  rainOn=!rainOn;
 };
 
-/* İLK ÇALIŞTIRMA */
 updateTime();
 </script>
-/*
 
-
+</body>
+</html>
