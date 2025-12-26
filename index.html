@@ -7,9 +7,13 @@
 
 <style>
 :root{
-  --yellow:#f5c400;--dark:#000;--card:#111;--soft:#1a1a1a
+  --yellow:#f5c400;
+  --dark:#000;
+  --card:#111;
+  --soft:#1a1a1a;
 }
 *{box-sizing:border-box}
+
 body{
   margin:0;
   background:var(--dark);
@@ -20,43 +24,50 @@ body{
   justify-content:center;
   align-items:center;
 }
+
+/* 🔥 PC’DE BÜYÜK */
 .app{
-  width:min(520px,90vw);
+  width:520px;
+  max-width:92vw;
   background:var(--card);
-  padding:40px;
-  border-radius:24px;
+  padding:32px;
+  border-radius:22px;
   text-align:center;
 }
+
 .tabs{
   display:flex;
-  gap:12px;
-  margin-bottom:20px
+  gap:10px;
+  margin-bottom:20px;
 }
 .tab{
   flex:1;
-  padding:12px;
+  padding:10px;
   border-radius:10px;
   background:var(--soft);
   opacity:.6;
   cursor:pointer;
-  user-select:none
+  user-select:none;
 }
 .tab.active{
   background:var(--yellow);
   color:#000;
-  opacity:1
+  opacity:1;
 }
+
+/* ⏱️ BÜYÜK TIMER */
 #time{
-  font-size:88px;
+  font-size:96px;
   font-weight:800;
-  margin:30px 0
+  margin:20px 0;
 }
+
 .quote{
   font-size:14px;
-  opacity:.75;
+  opacity:.7;
   font-style:italic;
-  margin-bottom:20px
 }
+
 button{
   width:100%;
   padding:14px;
@@ -66,18 +77,31 @@ button{
   background:var(--yellow);
   color:#000;
   font-weight:700;
-  cursor:pointer
+  cursor:pointer;
 }
-#inviteBar{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  background:#111;
+
+.settings{
+  text-align:left;
+  margin-top:22px;
+  font-size:15px;
+}
+
+.setting-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:12px;
+}
+
+input,select{
+  background:#222;
   color:var(--yellow);
-  padding:12px 16px;
-  border-radius:14px;
-  font-size:13px
+  border:none;
+  border-radius:8px;
+  padding:8px;
 }
+
+a{color:var(--yellow);text-decoration:none}
 </style>
 </head>
 
@@ -99,18 +123,52 @@ button{
   <button id="startBtn">START</button>
   <button id="rainBtn">🌧️ Yağmur Aç</button>
 
+  <div class="settings">
+    <strong>Bugün Ne Yapacağım?</strong>
+
+    <div class="setting-row">
+      <input id="taskInput" placeholder="Görev ekle">
+      <button id="addTaskBtn">+</button>
+    </div>
+
+    <select id="taskSelect" style="width:100%;margin-top:10px">
+      <option value="">Görev seç</option>
+    </select>
+
+    <div class="setting-row">
+      <span>Çalışma (dk)</span>
+      <input type="number" id="workInput" value="25">
+    </div>
+
+    <div class="setting-row">
+      <span>Mola (dk)</span>
+      <input type="number" id="breakInput" value="5">
+    </div>
+  </div>
 </div>
 
-<div id="inviteBar">
-  Arkadaşını davet et →
-  <button onclick="copyLink()">Linki Kopyala</button>
-</div>
-
+<!-- 🌧️ YAĞMUR -->
 <audio id="rainAudio" loop>
   <source src="rain.mp3" type="audio/mpeg">
 </audio>
 
 <script>
+/* 🌧️ YAĞMUR */
+const rainAudio = document.getElementById("rainAudio");
+const rainBtn = document.getElementById("rainBtn");
+let rainOn = false;
+
+rainBtn.onclick = () => {
+  if(!rainOn){
+    rainAudio.play();
+    rainBtn.textContent = "🌧️ Yağmur Kapat";
+  }else{
+    rainAudio.pause();
+    rainBtn.textContent = "🌧️ Yağmur Aç";
+  }
+  rainOn = !rainOn;
+};
+
 /* ⏱️ TIMER */
 let workMin = 25;
 let breakMin = 5;
@@ -119,33 +177,26 @@ let isWork = true;
 let running = false;
 let interval = null;
 
-/* 🌧️ */
-const rainAudio = document.getElementById("rainAudio");
-let rainOn = false;
-
-/* DOM */
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("startBtn");
-const rainBtn = document.getElementById("rainBtn");
 const tabWork = document.getElementById("tabWork");
 const tabBreak = document.getElementById("tabBreak");
 
-/* ⏱️ */
 function updateTime(){
   const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
   const s = String(timeLeft%60).padStart(2,"0");
   timeEl.textContent = `${m}:${s}`;
 }
 
-/* 🔄 MOD DEĞİŞTİR (DURMADAN) */
-function switchMode(work){
+/* 🔁 MOD DEĞİŞİR AMA TIMER DURMAZ */
+function switchTab(work){
   isWork = work;
   tabWork.classList.toggle("active", work);
   tabBreak.classList.toggle("active", !work);
 }
 
 /* ▶️ START / PAUSE */
-startBtn.onclick = ()=>{
+startBtn.onclick = () => {
   if(!running){
     running = true;
     startBtn.textContent = "PAUSE";
@@ -155,7 +206,7 @@ startBtn.onclick = ()=>{
 
       if(timeLeft <= 0){
         timeLeft = (isWork ? breakMin : workMin) * 60;
-        switchMode(!isWork);
+        switchTab(!isWork);
       }
     },1000);
   }else{
@@ -165,30 +216,50 @@ startBtn.onclick = ()=>{
   }
 };
 
-/* 🌧️ YAĞMUR */
-rainBtn.onclick = ()=>{
-  if(!rainOn){
-    rainAudio.play();
-    rainOn = true;
-    rainBtn.textContent = "🌧️ Yağmur Kapat";
-  }else{
-    rainAudio.pause();
-    rainOn = false;
-    rainBtn.textContent = "🌧️ Yağmur Aç";
+/* TABLAR */
+tabWork.onclick = () => switchTab(true);
+tabBreak.onclick = () => switchTab(false);
+
+/* AYARLAR */
+document.getElementById("workInput").onchange = e=>{
+  workMin = Number(e.target.value);
+  if(isWork && !running){
+    timeLeft = workMin*60;
+    updateTime();
   }
 };
 
-/* TABLAR */
-tabWork.onclick = ()=>switchMode(true);
-tabBreak.onclick = ()=>switchMode(false);
-
-/* 📋 */
-function copyLink(){
-  navigator.clipboard.writeText(location.href);
-  alert("Link kopyalandı!");
-}
+document.getElementById("breakInput").onchange = e=>{
+  breakMin = Number(e.target.value);
+};
 
 updateTime();
+
+/* 📝 TASKS */
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+const taskInput = document.getElementById("taskInput");
+const addTaskBtn = document.getElementById("addTaskBtn");
+const taskSelect = document.getElementById("taskSelect");
+
+function renderTasks(){
+  taskSelect.innerHTML = '<option value="">Görev seç</option>';
+  tasks.forEach((t,i)=>{
+    const o = document.createElement("option");
+    o.value=i;
+    o.textContent=t;
+    taskSelect.appendChild(o);
+  });
+}
+
+addTaskBtn.onclick = ()=>{
+  if(!taskInput.value) return;
+  tasks.push(taskInput.value);
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+  taskInput.value="";
+  renderTasks();
+};
+
+renderTasks();
 </script>
 
 </body>
