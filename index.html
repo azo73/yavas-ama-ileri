@@ -70,6 +70,23 @@ button{
   font-weight:700;
   cursor:pointer;
 }
+
+.settings{
+  margin-top:25px;
+}
+.setting-row{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+input{
+  width:80px;
+  background:#222;
+  color:var(--yellow);
+  border:none;
+  border-radius:6px;
+  padding:6px;
+}
 </style>
 </head>
 
@@ -87,6 +104,17 @@ button{
   <button id="startBtn">START</button>
   <button id="rainBtn">🌧️ Yağmur Aç</button>
 
+  <div class="settings">
+    <div class="setting-row">
+      <span>Pomodoro (dk)</span>
+      <input type="number" id="workInput" value="25">
+    </div>
+    <div class="setting-row">
+      <span>Short Break (dk)</span>
+      <input type="number" id="breakInput" value="5">
+    </div>
+  </div>
+
 </div>
 
 <audio id="rainAudio" loop>
@@ -94,85 +122,106 @@ button{
 </audio>
 
 <script>
-/* ⏱️ AYRI SAYAÇLAR */
-let workSeconds = 25 * 60;
-let breakSeconds = 5 * 60;
-
+/* STATE */
+let mode = "work"; // work | break
 let running = false;
 let interval = null;
-let view = "work"; // sadece ekran
+
+let workMin = 25;
+let breakMin = 5;
+let timeLeft = workMin * 60;
 
 /* DOM */
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("startBtn");
 const tabWork = document.getElementById("tabWork");
 const tabBreak = document.getElementById("tabBreak");
+const workInput = document.getElementById("workInput");
+const breakInput = document.getElementById("breakInput");
 
-/* 🌧️ */
+/* RAIN */
 const rainAudio = document.getElementById("rainAudio");
 const rainBtn = document.getElementById("rainBtn");
 let rainOn = false;
 
-/* FORMAT */
-function format(sec){
-  const m = String(Math.floor(sec/60)).padStart(2,"0");
-  const s = String(sec%60).padStart(2,"0");
-  return `${m}:${s}`;
+/* FUNCTIONS */
+function updateTime(){
+  const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
+  const s = String(timeLeft%60).padStart(2,"0");
+  timeEl.textContent = `${m}:${s}`;
 }
 
-/* EKRAN */
-function render(){
-  timeEl.textContent =
-    view === "work"
-      ? format(workSeconds)
-      : format(breakSeconds);
-}
-
-/* TIMER */
-function start(){
+function startTimer(){
   if(running) return;
   running = true;
   startBtn.textContent = "PAUSE";
 
   interval = setInterval(()=>{
-    if(workSeconds > 0) workSeconds--;
-    if(breakSeconds > 0) breakSeconds--;
+    timeLeft--;
+    updateTime();
 
-    render();
+    if(timeLeft <= 0){
+      pauseTimer();
+    }
   },1000);
 }
 
-function pause(){
+function pauseTimer(){
   running = false;
   clearInterval(interval);
   startBtn.textContent = "START";
 }
 
-startBtn.onclick = ()=> running ? pause() : start();
+function switchMode(newMode){
+  pauseTimer();
+  mode = newMode;
 
-/* TABLAR — TIMER DURMAZ */
-tabWork.onclick = ()=>{
-  view = "work";
-  tabWork.classList.add("active");
-  tabBreak.classList.remove("active");
-  render();
+  if(mode === "work"){
+    timeLeft = workMin * 60;
+    tabWork.classList.add("active");
+    tabBreak.classList.remove("active");
+  }else{
+    timeLeft = breakMin * 60;
+    tabBreak.classList.add("active");
+    tabWork.classList.remove("active");
+  }
+  updateTime();
+}
+
+/* EVENTS */
+startBtn.onclick = ()=> running ? pauseTimer() : startTimer();
+
+tabWork.onclick = ()=> switchMode("work");
+tabBreak.onclick = ()=> switchMode("break");
+
+workInput.onchange = ()=>{
+  workMin = Number(workInput.value);
+  if(mode==="work" && !running){
+    timeLeft = workMin*60;
+    updateTime();
+  }
 };
 
-tabBreak.onclick = ()=>{
-  view = "break";
-  tabBreak.classList.add("active");
-  tabWork.classList.remove("active");
-  render();
+breakInput.onchange = ()=>{
+  breakMin = Number(breakInput.value);
+  if(mode==="break" && !running){
+    timeLeft = breakMin*60;
+    updateTime();
+  }
 };
 
-/* 🌧️ */
 rainBtn.onclick = ()=>{
-  rainOn ? rainAudio.pause() : rainAudio.play();
+  if(!rainOn){
+    rainAudio.play();
+    rainBtn.textContent="🌧️ Yağmur Kapat";
+  }else{
+    rainAudio.pause();
+    rainBtn.textContent="🌧️ Yağmur Aç";
+  }
   rainOn = !rainOn;
-  rainBtn.textContent = rainOn ? "🌧️ Yağmur Kapat" : "🌧️ Yağmur Aç";
 };
 
-render();
+updateTime();
 </script>
 
 </body>
