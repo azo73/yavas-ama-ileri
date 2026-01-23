@@ -2,178 +2,58 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Yavaş Ama İleri – Pomodoro</title>
+<title>Giriş / Kayıt</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-:root{
-  --yellow:#f5c400;
-  --dark:#000;
-  --card:#111;
-  --soft:#1a1a1a;
-}
-*{box-sizing:border-box}
-
 body{
-  margin:0;
-  background:var(--dark);
-  color:var(--yellow);
-  font-family:system-ui,sans-serif;
-  min-height:100vh;
+  background:#000;
+  color:#f5c400;
+  font-family:system-ui;
   display:flex;
   align-items:center;
   justify-content:center;
+  min-height:100vh;
 }
-
-.app{
-  width:520px;
-  max-width:95vw;
-  background:var(--card);
+.box{
+  background:#111;
   padding:40px;
-  border-radius:24px;
-  text-align:center;
+  border-radius:20px;
+  width:320px;
 }
-
-/* AUTH */
-#auth input{
+input,button{
   width:100%;
-  margin-top:10px;
-  background:#222;
-  color:var(--yellow);
-  border:none;
-  border-radius:8px;
-  padding:10px;
-}
-#userPanel{
-  margin-bottom:15px;
-}
-
-/* TABS */
-.tabs{
-  display:flex;
-  gap:10px;
-  margin-bottom:20px;
-}
-.tab{
-  flex:1;
-  padding:12px;
-  border-radius:10px;
-  background:var(--soft);
-  opacity:.5;
-  cursor:pointer;
-}
-.tab.active{
-  background:var(--yellow);
-  color:#000;
-  opacity:1;
-}
-
-#time{
-  font-size:96px;
-  font-weight:800;
-  margin:20px 0;
-}
-
-button{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:12px;
   margin-top:12px;
-  background:var(--yellow);
-  color:#000;
-  font-weight:700;
-  cursor:pointer;
+  padding:12px;
+  border:none;
+  border-radius:10px;
 }
-
-.settings{
-  margin-top:25px;
-}
-.setting-row{
-  display:flex;
-  justify-content:space-between;
-  margin-top:10px;
-}
-input[type=number]{
-  width:80px;
-}
-
-/* LEADERBOARD */
-ol{
-  padding-left:20px;
-  text-align:left;
-}
+input{background:#222;color:#f5c400}
+button{background:#f5c400;color:#000;font-weight:700}
+a{color:#f5c400;display:block;margin-top:15px;text-align:center}
 </style>
 </head>
-
 <body>
 
-<div class="app">
-
-  <!-- AUTH -->
-  <div id="auth">
-    <h3>Giriş / Kayıt</h3>
-    <input id="username" placeholder="Kullanıcı adı">
-    <input id="password" type="password" placeholder="Şifre">
-    <button id="loginBtn">Giriş Yap</button>
-    <button id="registerBtn">Kayıt Ol</button>
-  </div>
-
-  <div id="userPanel" style="display:none">
-    👋 Hoş geldin <b id="currentUser"></b>
-    <button id="logoutBtn">Çıkış Yap</button>
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs">
-    <div class="tab active" id="tabWork">Pomodoro</div>
-    <div class="tab" id="tabBreak">Short Break</div>
-  </div>
-
-  <div id="time">25:00</div>
-
-  <button id="startBtn">START</button>
-  <button id="rainBtn">🌧️ Yağmur Aç</button>
-
-  <div class="settings">
-    <div class="setting-row">
-      <span>Pomodoro (dk)</span>
-      <input type="number" id="workInput" value="25">
-    </div>
-    <div class="setting-row">
-      <span>Short Break (dk)</span>
-      <input type="number" id="breakInput" value="5">
-    </div>
-  </div>
-
-  <div class="settings">
-    <h3>🏆 Sıralama</h3>
-    <ol id="leaderboard"></ol>
-  </div>
-
+<div class="box">
+  <h2>Giriş / Kayıt</h2>
+  <input id="username" placeholder="Kullanıcı adı">
+  <input id="password" type="password" placeholder="Şifre">
+  <button id="loginBtn">Giriş Yap</button>
+  <button id="registerBtn">Kayıt Ol</button>
+  <a href="index.html">← Pomodoro’ya dön</a>
 </div>
 
-<audio id="rainAudio" loop>
-  <source src="rain.mp3" type="audio/mpeg">
-</audio>
-
 <script>
-/* ================= AUTH ================= */
 let users = JSON.parse(localStorage.getItem("users")) || [];
-let currentUser = localStorage.getItem("currentUser");
 
-const auth = document.getElementById("auth");
-const userPanel = document.getElementById("userPanel");
-const currentUserEl = document.getElementById("currentUser");
-
-function showUser(){
-  if(currentUser){
-    auth.style.display="none";
-    userPanel.style.display="block";
-    currentUserEl.textContent=currentUser;
-  }
-}
-showUser();
+loginBtn.onclick=()=>{
+  const u=username.value.trim();
+  const p=password.value.trim();
+  const user=users.find(x=>x.username===u && x.password===p);
+  if(!user) return alert("Hatalı giriş");
+  localStorage.setItem("currentUser",u);
+  location.href="index.html";
+};
 
 registerBtn.onclick=()=>{
   const u=username.value.trim();
@@ -184,115 +64,6 @@ registerBtn.onclick=()=>{
   localStorage.setItem("users",JSON.stringify(users));
   alert("Kayıt başarılı");
 };
-
-loginBtn.onclick=()=>{
-  const u=username.value;
-  const p=password.value;
-  const user=users.find(x=>x.username===u&&x.password===p);
-  if(!user) return alert("Hatalı giriş");
-  currentUser=u;
-  localStorage.setItem("currentUser",u);
-  showUser();
-};
-
-logoutBtn.onclick=()=>{
-  localStorage.removeItem("currentUser");
-  location.reload();
-};
-
-/* ================= TIMER ================= */
-let mode="work";
-let running=false;
-let interval=null;
-let workMin=25;
-let breakMin=5;
-let timeLeft=workMin*60;
-
-const timeEl=document.getElementById("time");
-const startBtn=document.getElementById("startBtn");
-const tabWork=document.getElementById("tabWork");
-const tabBreak=document.getElementById("tabBreak");
-const workInput=document.getElementById("workInput");
-const breakInput=document.getElementById("breakInput");
-
-function updateTime(){
-  const m=String(Math.floor(timeLeft/60)).padStart(2,"0");
-  const s=String(timeLeft%60).padStart(2,"0");
-  timeEl.textContent=`${m}:${s}`;
-}
-
-function startTimer(){
-  if(running) return;
-  running=true;
-  startBtn.textContent="PAUSE";
-  interval=setInterval(()=>{
-    timeLeft--;
-    updateTime();
-    if(timeLeft<=0){
-      pauseTimer();
-      if(mode==="work" && currentUser){
-        users=users.map(u=>{
-          if(u.username===currentUser) u.score++;
-          return u;
-        });
-        localStorage.setItem("users",JSON.stringify(users));
-        renderLeaderboard();
-      }
-    }
-  },1000);
-}
-
-function pauseTimer(){
-  running=false;
-  clearInterval(interval);
-  startBtn.textContent="START";
-}
-
-function switchMode(m){
-  pauseTimer();
-  mode=m;
-  timeLeft=(m==="work"?workMin:breakMin)*60;
-  tabWork.classList.toggle("active",m==="work");
-  tabBreak.classList.toggle("active",m==="break");
-  updateTime();
-}
-
-startBtn.onclick=()=>running?pauseTimer():startTimer();
-tabWork.onclick=()=>switchMode("work");
-tabBreak.onclick=()=>switchMode("break");
-
-workInput.onchange=()=>{
-  workMin=Number(workInput.value);
-  if(mode==="work"&&!running){timeLeft=workMin*60;updateTime();}
-};
-breakInput.onchange=()=>{
-  breakMin=Number(breakInput.value);
-  if(mode==="break"&&!running){timeLeft=breakMin*60;updateTime();}
-};
-
-/* ================= RAIN ================= */
-const rainAudio=document.getElementById("rainAudio");
-const rainBtn=document.getElementById("rainBtn");
-let rainOn=false;
-
-rainBtn.onclick=()=>{
-  rainOn?rainAudio.pause():rainAudio.play();
-  rainBtn.textContent=rainOn?"🌧️ Yağmur Aç":"🌧️ Yağmur Kapat";
-  rainOn=!rainOn;
-};
-
-/* ================= LEADERBOARD ================= */
-function renderLeaderboard(){
-  leaderboard.innerHTML="";
-  [...users].sort((a,b)=>b.score-a.score).forEach(u=>{
-    const li=document.createElement("li");
-    li.textContent=`${u.username} – ${u.score}`;
-    leaderboard.appendChild(li);
-  });
-}
-renderLeaderboard();
-
-updateTime();
 </script>
 
 </body>
