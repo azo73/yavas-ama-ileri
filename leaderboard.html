@@ -2,105 +2,45 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Yavaş Ama İleri – Skor Tablosu</title>
+<title>Sıralama</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-:root{
-  --yellow:#f5c400;--dark:#000;--card:#111;--soft:#1a1a1a
-}
-*{box-sizing:border-box}
 body{
-  margin:0;background:var(--dark);color:var(--yellow);
-  font-family:system-ui,sans-serif;
-  min-height:100vh;display:flex;justify-content:center
+  background:#000;
+  color:#f5c400;
+  font-family:system-ui;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
 }
-.container{width:360px;margin-top:40px}
-.card{background:var(--card);border-radius:18px;padding:20px}
-h1{text-align:center;font-size:20px;margin-bottom:16px}
-.row{
-  display:flex;justify-content:space-between;
-  padding:10px;border-radius:8px;
-  margin-bottom:8px;background:var(--soft)
+.box{
+  background:#111;
+  padding:40px;
+  border-radius:20px;
+  width:360px;
 }
-.row.me{background:var(--yellow);color:#000;font-weight:600}
-.rank{width:30px}
-.name{flex:1}
-.score{width:70px;text-align:right}
-a{
-  display:block;text-align:center;
-  margin-top:20px;color:var(--yellow);
-  text-decoration:none
-}
+ol{padding-left:20px}
+a{color:#f5c400;display:block;margin-top:15px;text-align:center}
 </style>
 </head>
-
 <body>
 
-<div class="container">
-  <div class="card">
-    <h1>🏆 Skor Tablosu</h1>
-    <div id="list"></div>
-  </div>
-
-  <a href="index.html">← Pomodoro’ya Dön</a>
+<div class="box">
+  <h2>🏆 Sıralama</h2>
+  <ol id="list"></ol>
+  <a href="index.html">← Pomodoro’ya dön</a>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-firestore.js";
+<script>
+let users = JSON.parse(localStorage.getItem("users")) || [];
+users.sort((a,b)=>b.score-a.score);
 
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyCDD8SkEVpDLFGpHtUozovyBM2XuuZHs18",
-  authDomain: "yavas-ama-ileri.firebaseapp.com",
-  projectId: "yavas-ama-ileri",
-  storageBucket: "yavas-ama-ileri.firebasestorage.app",
-  messagingSenderId: "375260128218",
-  appId: "1:375260128218:web:10f140a93e4902c90756e3"
-};
-
-// Firebase başlat
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const listEl = document.getElementById("list");
-const myName = localStorage.getItem("username") || "Misafir";
-const myScore = Number(localStorage.getItem("score")) || 0;
-
-// Kullanıcı skorunu Firestore'a kaydet
-async function saveMyScore() {
-  const usersRef = collection(db, "scores");
-  
-  // Eğer kullanıcı daha önce varsa güncelleme yerine yeni kayıt ekle
-  await addDoc(usersRef, { name: myName, score: myScore });
-}
-
-// Leaderboard'u Firestore’dan çek ve ekrana yaz
-async function displayLeaderboard() {
-  listEl.innerHTML = "";
-  const q = query(collection(db, "scores"), orderBy("score", "desc"));
-  const snapshot = await getDocs(q);
-  const leaderboard = [];
-  snapshot.forEach(doc => leaderboard.push(doc.data()));
-  
-  leaderboard.forEach((u, i) => {
-    const row = document.createElement("div");
-    row.className = "row" + (u.name === myName ? " me" : "");
-    row.innerHTML = `
-      <div class="rank">${i+1}</div>
-      <div class="name">${u.name}</div>
-      <div class="score">${u.score}</div>
-    `;
-    listEl.appendChild(row);
-  });
-}
-
-// Başlat
-(async () => {
-  await saveMyScore();
-  displayLeaderboard();
-})();
+users.forEach(u=>{
+  const li=document.createElement("li");
+  li.textContent=`${u.username} – ${u.score}`;
+  list.appendChild(li);
+});
 </script>
 
 </body>
