@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5935458968037999"
-     crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <title>Yavaş Ama İleri – Pomodoro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,6 +34,21 @@ body{
   text-align:center;
 }
 
+/* AUTH */
+#auth input{
+  width:100%;
+  margin-top:10px;
+  background:#222;
+  color:var(--yellow);
+  border:none;
+  border-radius:8px;
+  padding:10px;
+}
+#userPanel{
+  margin-bottom:15px;
+}
+
+/* TABS */
 .tabs{
   display:flex;
   gap:10px;
@@ -81,13 +94,14 @@ button{
   justify-content:space-between;
   margin-top:10px;
 }
-input{
+input[type=number]{
   width:80px;
-  background:#222;
-  color:var(--yellow);
-  border:none;
-  border-radius:6px;
-  padding:6px;
+}
+
+/* LEADERBOARD */
+ol{
+  padding-left:20px;
+  text-align:left;
 }
 </style>
 </head>
@@ -96,6 +110,21 @@ input{
 
 <div class="app">
 
+  <!-- AUTH -->
+  <div id="auth">
+    <h3>Giriş / Kayıt</h3>
+    <input id="username" placeholder="Kullanıcı adı">
+    <input id="password" type="password" placeholder="Şifre">
+    <button id="loginBtn">Giriş Yap</button>
+    <button id="registerBtn">Kayıt Ol</button>
+  </div>
+
+  <div id="userPanel" style="display:none">
+    👋 Hoş geldin <b id="currentUser"></b>
+    <button id="logoutBtn">Çıkış Yap</button>
+  </div>
+
+  <!-- TABS -->
   <div class="tabs">
     <div class="tab active" id="tabWork">Pomodoro</div>
     <div class="tab" id="tabBreak">Short Break</div>
@@ -117,6 +146,11 @@ input{
     </div>
   </div>
 
+  <div class="settings">
+    <h3>🏆 Sıralama</h3>
+    <ol id="leaderboard"></ol>
+  </div>
+
 </div>
 
 <audio id="rainAudio" loop>
@@ -124,104 +158,139 @@ input{
 </audio>
 
 <script>
-/* STATE */
-let mode = "work"; // work | break
-let running = false;
-let interval = null;
+/* ================= AUTH ================= */
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let currentUser = localStorage.getItem("currentUser");
 
-let workMin = 25;
-let breakMin = 5;
-let timeLeft = workMin * 60;
+const auth = document.getElementById("auth");
+const userPanel = document.getElementById("userPanel");
+const currentUserEl = document.getElementById("currentUser");
 
-/* DOM */
-const timeEl = document.getElementById("time");
-const startBtn = document.getElementById("startBtn");
-const tabWork = document.getElementById("tabWork");
-const tabBreak = document.getElementById("tabBreak");
-const workInput = document.getElementById("workInput");
-const breakInput = document.getElementById("breakInput");
+function showUser(){
+  if(currentUser){
+    auth.style.display="none";
+    userPanel.style.display="block";
+    currentUserEl.textContent=currentUser;
+  }
+}
+showUser();
 
-/* RAIN */
-const rainAudio = document.getElementById("rainAudio");
-const rainBtn = document.getElementById("rainBtn");
-let rainOn = false;
+registerBtn.onclick=()=>{
+  const u=username.value.trim();
+  const p=password.value.trim();
+  if(!u||!p) return alert("Boş bırakma");
+  if(users.find(x=>x.username===u)) return alert("Kullanıcı var");
+  users.push({username:u,password:p,score:0});
+  localStorage.setItem("users",JSON.stringify(users));
+  alert("Kayıt başarılı");
+};
 
-/* FUNCTIONS */
+loginBtn.onclick=()=>{
+  const u=username.value;
+  const p=password.value;
+  const user=users.find(x=>x.username===u&&x.password===p);
+  if(!user) return alert("Hatalı giriş");
+  currentUser=u;
+  localStorage.setItem("currentUser",u);
+  showUser();
+};
+
+logoutBtn.onclick=()=>{
+  localStorage.removeItem("currentUser");
+  location.reload();
+};
+
+/* ================= TIMER ================= */
+let mode="work";
+let running=false;
+let interval=null;
+let workMin=25;
+let breakMin=5;
+let timeLeft=workMin*60;
+
+const timeEl=document.getElementById("time");
+const startBtn=document.getElementById("startBtn");
+const tabWork=document.getElementById("tabWork");
+const tabBreak=document.getElementById("tabBreak");
+const workInput=document.getElementById("workInput");
+const breakInput=document.getElementById("breakInput");
+
 function updateTime(){
-  const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
-  const s = String(timeLeft%60).padStart(2,"0");
-  timeEl.textContent = `${m}:${s}`;
+  const m=String(Math.floor(timeLeft/60)).padStart(2,"0");
+  const s=String(timeLeft%60).padStart(2,"0");
+  timeEl.textContent=`${m}:${s}`;
 }
 
 function startTimer(){
   if(running) return;
-  running = true;
-  startBtn.textContent = "PAUSE";
-
-  interval = setInterval(()=>{
+  running=true;
+  startBtn.textContent="PAUSE";
+  interval=setInterval(()=>{
     timeLeft--;
     updateTime();
-
-    if(timeLeft <= 0){
+    if(timeLeft<=0){
       pauseTimer();
+      if(mode==="work" && currentUser){
+        users=users.map(u=>{
+          if(u.username===currentUser) u.score++;
+          return u;
+        });
+        localStorage.setItem("users",JSON.stringify(users));
+        renderLeaderboard();
+      }
     }
   },1000);
 }
 
 function pauseTimer(){
-  running = false;
+  running=false;
   clearInterval(interval);
-  startBtn.textContent = "START";
+  startBtn.textContent="START";
 }
 
-function switchMode(newMode){
+function switchMode(m){
   pauseTimer();
-  mode = newMode;
-
-  if(mode === "work"){
-    timeLeft = workMin * 60;
-    tabWork.classList.add("active");
-    tabBreak.classList.remove("active");
-  }else{
-    timeLeft = breakMin * 60;
-    tabBreak.classList.add("active");
-    tabWork.classList.remove("active");
-  }
+  mode=m;
+  timeLeft=(m==="work"?workMin:breakMin)*60;
+  tabWork.classList.toggle("active",m==="work");
+  tabBreak.classList.toggle("active",m==="break");
   updateTime();
 }
 
-/* EVENTS */
-startBtn.onclick = ()=> running ? pauseTimer() : startTimer();
+startBtn.onclick=()=>running?pauseTimer():startTimer();
+tabWork.onclick=()=>switchMode("work");
+tabBreak.onclick=()=>switchMode("break");
 
-tabWork.onclick = ()=> switchMode("work");
-tabBreak.onclick = ()=> switchMode("break");
-
-workInput.onchange = ()=>{
-  workMin = Number(workInput.value);
-  if(mode==="work" && !running){
-    timeLeft = workMin*60;
-    updateTime();
-  }
+workInput.onchange=()=>{
+  workMin=Number(workInput.value);
+  if(mode==="work"&&!running){timeLeft=workMin*60;updateTime();}
+};
+breakInput.onchange=()=>{
+  breakMin=Number(breakInput.value);
+  if(mode==="break"&&!running){timeLeft=breakMin*60;updateTime();}
 };
 
-breakInput.onchange = ()=>{
-  breakMin = Number(breakInput.value);
-  if(mode==="break" && !running){
-    timeLeft = breakMin*60;
-    updateTime();
-  }
+/* ================= RAIN ================= */
+const rainAudio=document.getElementById("rainAudio");
+const rainBtn=document.getElementById("rainBtn");
+let rainOn=false;
+
+rainBtn.onclick=()=>{
+  rainOn?rainAudio.pause():rainAudio.play();
+  rainBtn.textContent=rainOn?"🌧️ Yağmur Aç":"🌧️ Yağmur Kapat";
+  rainOn=!rainOn;
 };
 
-rainBtn.onclick = ()=>{
-  if(!rainOn){
-    rainAudio.play();
-    rainBtn.textContent="🌧️ Yağmur Kapat";
-  }else{
-    rainAudio.pause();
-    rainBtn.textContent="🌧️ Yağmur Aç";
-  }
-  rainOn = !rainOn;
-};
+/* ================= LEADERBOARD ================= */
+function renderLeaderboard(){
+  leaderboard.innerHTML="";
+  [...users].sort((a,b)=>b.score-a.score).forEach(u=>{
+    const li=document.createElement("li");
+    li.textContent=`${u.username} – ${u.score}`;
+    leaderboard.appendChild(li);
+  });
+}
+renderLeaderboard();
 
 updateTime();
 </script>
