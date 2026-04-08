@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medizinische Informationen | Sağlık Portalı</title>
+    <title>GesundheitsBlog | Tıbbi Bilgi Portalı</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* --- RENKLER VE TEMEL AYARLAR --- */
         :root {
-            --primary-color: #0ea5e9; 
-            --primary-dark: #0284c7; 
+            --primary: #0284c7; 
             --bg-color: #f8fafc; 
             --card-bg: #ffffff; 
             --text-dark: #0f172a; 
             --text-muted: #64748b; 
-            --accent-green: #10b981; 
+            --border-color: #e2e8f0;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,109 +29,170 @@
 
         .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
+        /* --- MENÜ --- */
         header {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000;
-            padding: 1.2rem 0; border-bottom: 1px solid #e2e8f0;
+            padding: 1.2rem 0; border-bottom: 1px solid var(--border-color);
         }
 
         nav { display: flex; justify-content: space-between; align-items: center; }
-
-        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); }
-        .logo span { color: var(--primary-color); }
+        .logo { font-size: 1.6rem; font-weight: 700; color: var(--text-dark); }
+        .logo span { color: var(--primary); }
 
         nav ul { display: flex; list-style: none; gap: 30px; }
-        nav ul li a { color: var(--text-muted); text-decoration: none; font-weight: 600; transition: color 0.3s ease; }
-        nav ul li a:hover { color: var(--primary-color); }
+        nav ul li a { color: var(--text-muted); text-decoration: none; font-weight: 600; transition: color 0.3s; }
+        nav ul li a:hover { color: var(--primary); }
 
+        /* --- HERO (BAŞLIK) ALANI --- */
         #hero {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: white; padding: 100px 20px; text-align: center;
-            border-radius: 0 0 40px 40px; margin-bottom: -50px;
+            color: white; padding: 60px 20px; text-align: center;
+        }
+        #hero h2 { font-size: 2.2rem; font-weight: 700; margin-bottom: 10px; }
+        #hero p { color: #cbd5e1; font-size: 1.1rem; }
+
+        /* --- BLOG DÜZENİ (GRID YAPISI) --- */
+        .blog-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Sol taraf geniş (makaleler), sağ taraf dar (kenar çubuğu) */
+            gap: 40px;
+            margin-top: 50px;
+            margin-bottom: 80px;
         }
 
-        #hero h2 { margin-bottom: 25px; font-size: 2.5rem; font-weight: 700; }
-        #hero p { color: #cbd5e1; margin-bottom: 30px; }
-
-        #searchInput {
-            width: 100%; max-width: 650px; padding: 18px 25px;
-            border-radius: 50px; border: 2px solid transparent;
-            font-size: 1.1rem; outline: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        #searchInput:focus { border-color: var(--primary-color); }
-
-        #content {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px; position: relative; z-index: 10; margin-bottom: 60px;
-        }
-
-        .card {
-            background: var(--card-bg); padding: 35px; border-radius: 20px;
+        /* --- MAKALELER (SOL TARAF) --- */
+        .post {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            border: 1px solid #f1f5f9; transition: all 0.4s ease;
-            display: flex; flex-direction: column;
+            transition: transform 0.3s ease;
         }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .post:hover { transform: translateY(-5px); }
 
-        .card-tag {
-            display: inline-block; align-self: flex-start;
-            background: #dcfce7; color: #166534; padding: 4px 12px;
-            border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 15px;
+        .post-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .category-tag {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
         }
 
-        .card h3 { color: var(--text-dark); margin-bottom: 12px; font-size: 1.3rem; }
-        .card p { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 25px; flex-grow: 1; }
+        .post h3 { font-size: 1.8rem; margin-bottom: 15px; color: var(--text-dark); }
+        .post p { font-size: 1.05rem; color: var(--text-muted); margin-bottom: 25px; }
 
         .read-more {
-            display: inline-block; padding: 12px 24px;
-            background-color: var(--primary-color); color: white;
-            text-decoration: none; border-radius: 50px; font-size: 0.9rem;
-            font-weight: 600; text-align: center; transition: all 0.3s ease;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
         }
-        .read-more:hover { background-color: var(--primary-dark); transform: scale(1.02); }
+        .read-more:hover { text-decoration: underline; }
+
+        /* --- KENAR ÇUBUĞU (SAĞ TARAF - SIDEBAR) --- */
+        .sidebar {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .sidebar h4 { font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        
+        .sidebar-list { list-style: none; }
+        .sidebar-list li { margin-bottom: 15px; }
+        .sidebar-list a { color: var(--text-muted); text-decoration: none; transition: 0.3s; }
+        .sidebar-list a:hover { color: var(--primary); padding-left: 5px; }
+
+        /* MOBİL UYUM */
+        @media (max-width: 768px) {
+            .blog-layout { grid-template-columns: 1fr; } /* Telefonda alt alta dizer */
+            nav ul { display: none; } /* Şimdilik telefonda menüyü gizledik */
+        }
     </style>
 </head>
 <body>
 
     <header>
         <nav class="container">
-            <div class="logo">Gesundheits<span>Portal</span></div>
+            <div class="logo">Gesundheits<span>Blog</span></div>
             <ul>
-                <li><a href="#" class="active">Startseite</a></li>
-                <li><a href="#">Krankheiten</a></li>
-                <li><a href="#">Über uns</a></li>
+                <li><a href="#" class="active">Artikel</a></li>
+                <li><a href="#">Kategorien</a></li>
+                <li><a href="#">Über den Autor</a></li>
             </ul>
         </nav>
     </header>
 
-    <main>
-        <section id="hero">
-            <div class="container">
-                <h2>Medizinisches Wissen für alle</h2>
-                <p>Suchen Sie nach verlässlichen Informationen über Krankheiten und Symptome.</p>
-                <div>
-                    <input type="text" id="searchInput" placeholder="Symptom veya hastalık arayın (z.B. Kopfschmerzen)...">
+    <section id="hero">
+        <div class="container">
+            <h2>Neueste Medizinische Erkenntnisse</h2>
+            <p>Vertrauenswürdige und verständliche Gesundheitsinformationen.</p>
+        </div>
+    </section>
+
+    <main class="container blog-layout">
+        
+        <div class="articles">
+            
+            <article class="post">
+                <div class="post-meta">
+                    <span class="category-tag">Kardiyoloji</span>
+                    <span>12. Mai 2024</span>
+                    <span>• 5 Min. Lesezeit</span>
                 </div>
-            </div>
-        </section>
+                <h3>Bluthochdruck: Ursachen, Symptome und Behandlung</h3>
+                <p>Bluthochdruck (Hypertonie) ist eine der häufigsten Erkrankungen weltweit. Oft bleibt er lange unbemerkt, da er selten sofortige Symptome verursacht. In diesem Artikel klären wir auf, wie Sie die Risiken minimieren können...</p>
+                <a href="#" class="read-more">Vollständigen Artikel lesen &rarr;</a>
+            </article>
 
-        <section id="content" class="container">
-            <div class="card">
-                <div class="card-tag">Häufig (Sık Görülür)</div>
-                <h3>Bluthochdruck (Hipertansiyon)</h3>
-                <p>Bluthochdruck ist ein häufiger Zustand, bei dem die langfristige Kraft des Blutes gegen Ihre Arterienwände hoch genug ist, um gesundheitliche Probleme zu verursachen.</p>
-                <a href="#" class="read-more">Mehr erfahren &rarr;</a>
+            <article class="post">
+                <div class="post-meta">
+                    <span class="category-tag">Beslenme</span>
+                    <span>08. Mai 2024</span>
+                    <span>• 4 Min. Lesezeit</span>
+                </div>
+                <h3>Diabetes Mellitus: Ein Leben mit der Diagnose</h3>
+                <p>Die Diagnose Diabetes verändert den Alltag drastisch. Von der richtigen Ernährung bis hin zur ständigen Blutzuckerkontrolle. Erfahren Sie hier die neuesten Ansätze aus der Diabetologie und wie Sie Ihren Alltag meistern...</p>
+                <a href="#" class="read-more">Vollständigen Artikel lesen &rarr;</a>
+            </article>
+
+        </div>
+
+        <aside class="sidebar">
+            
+            <div class="widget">
+                <h4>Kategorien (Kategoriler)</h4>
+                <ul class="sidebar-list">
+                    <li><a href="#">Kardiologie (Kalp)</a></li>
+                    <li><a href="#">Neurologie (Sinir)</a></li>
+                    <li><a href="#">Ernährung (Beslenme)</a></li>
+                    <li><a href="#">Psychologie (Psikoloji)</a></li>
+                </ul>
             </div>
 
-            <div class="card">
-                <div class="card-tag">Chronisch (Kronik)</div>
-                <h3>Diabetes Mellitus (Diyabet)</h3>
-                <p>Diabetes ist eine chronische Stoffwechselerkrankung, die zu einem erhöhten Blutzuckerspiegel führt, da der Körper nicht genug Insulin produziert.</p>
-                <a href="#" class="read-more">Mehr erfahren &rarr;</a>
+            <div class="widget" style="margin-top: 40px;">
+                <h4>Suche (Arama)</h4>
+                <input type="text" placeholder="Blog'da ara..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none;">
             </div>
-        </section>
+
+        </aside>
+
     </main>
 
 </body>
