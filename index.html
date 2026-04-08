@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medizinische Informationen | Sağlık Portalı</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <nav>
-            <h1>GesundheitsPortal</h1>
+        <nav class="container">
+            <div class="logo">Gesundheits<span>Portal</span></div>
             <ul>
-                <li><a href="#">Startseite</a></li>
+                <li><a href="#" class="active">Startseite</a></li>
                 <li><a href="#">Krankheiten</a></li>
                 <li><a href="#">Über uns</a></li>
             </ul>
@@ -22,21 +22,28 @@
 
     <main>
         <section id="hero">
-            <h2>Suchen Sie nach medizinischen Informationen?</h2>
-            <input type="text" id="searchInput" placeholder="Symptom veya hastalık arayın (z.B. Kopfschmerzen)...">
+            <div class="container">
+                <h2>Medizinisches Wissen für alle</h2>
+                <p>Suchen Sie nach verlässlichen Informationen über Krankheiten und Symptome.</p>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Symptom veya hastalık arayın (z.B. Kopfschmerzen)...">
+                </div>
+            </div>
         </section>
 
-        <section id="content">
+        <section id="content" class="container">
             <div class="card">
+                <div class="card-tag">Häufig (Sık Görülür)</div>
                 <h3>Bluthochdruck (Hipertansiyon)</h3>
                 <p>Bluthochdruck ist ein häufiger Zustand, bei dem die langfristige Kraft des Blutes gegen Ihre Arterienwände hoch genug ist, um gesundheitliche Probleme zu verursachen.</p>
-                <a href="#" class="read-more">Mehr lesen</a>
+                <a href="#" class="read-more">Mehr erfahren &rarr;</a>
             </div>
 
             <div class="card">
+                <div class="card-tag">Chronisch (Kronik)</div>
                 <h3>Diabetes Mellitus (Diyabet)</h3>
                 <p>Diabetes ist eine chronische Stoffwechselerkrankung, die zu einem erhöhten Blutzuckerspiegel führt, da der Körper nicht genug Insulin produziert.</p>
-                <a href="#" class="read-more">Mehr lesen</a>
+                <a href="#" class="read-more">Mehr erfahren &rarr;</a>
             </div>
         </section>
     </main>
