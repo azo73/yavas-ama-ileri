@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GesundheitsBlog | Tıbbi Bilgi Portalı</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>PflegeDeutsch | Hemşirelik Almancası</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- RENKLER VE TEMEL AYARLAR --- */
         :root {
             --primary: #0284c7; 
-            --bg-color: #f8fafc; 
+            --bg-color: #f0fdfa; /* Açık medikal yeşil arka plan */
             --card-bg: #ffffff; 
             --text-dark: #0f172a; 
             --text-muted: #64748b; 
-            --border-color: #e2e8f0;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,177 +21,206 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-dark);
-            line-height: 1.7;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-
-        /* --- MENÜ --- */
-        header {
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000;
-            padding: 1.2rem 0; border-bottom: 1px solid var(--border-color);
-        }
-
-        nav { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 1.6rem; font-weight: 700; color: var(--text-dark); }
-        .logo span { color: var(--primary); }
-
-        nav ul { display: flex; list-style: none; gap: 30px; }
-        nav ul li a { color: var(--text-muted); text-decoration: none; font-weight: 600; transition: color 0.3s; }
-        nav ul li a:hover { color: var(--primary); }
-
-        /* --- HERO (BAŞLIK) ALANI --- */
-        #hero {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: white; padding: 60px 20px; text-align: center;
-        }
-        #hero h2 { font-size: 2.2rem; font-weight: 700; margin-bottom: 10px; }
-        #hero p { color: #cbd5e1; font-size: 1.1rem; }
-
-        /* --- BLOG DÜZENİ (GRID YAPISI) --- */
-        .blog-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr; /* Sol taraf geniş (makaleler), sağ taraf dar (kenar çubuğu) */
-            gap: 40px;
-            margin-top: 50px;
-            margin-bottom: 80px;
-        }
-
-        /* --- MAKALELER (SOL TARAF) --- */
-        .post {
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-        }
-        .post:hover { transform: translateY(-5px); }
-
-        .post-meta {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 15px;
             display: flex;
-            gap: 15px;
+            flex-direction: column;
             align-items: center;
-        }
-        .category-tag {
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        .post h3 { font-size: 1.8rem; margin-bottom: 15px; color: var(--text-dark); }
-        .post p { font-size: 1.05rem; color: var(--text-muted); margin-bottom: 25px; }
-
-        .read-more {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            margin-top: 20px;
         }
-        .read-more:hover { text-decoration: underline; }
 
-        /* --- KENAR ÇUBUĞU (SAĞ TARAF - SIDEBAR) --- */
-        .sidebar {
-            background: var(--card-bg);
+        header h1 { color: var(--primary); font-size: 2rem; margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* --- FLASHCARD (DÖNEN KART) ALANI --- */
+        .flashcard-container {
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            perspective: 1000px; /* 3D efekti için derinlik */
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d; /* Kartın iki yüzü olmasını sağlar */
+        }
+
+        /* JavaScript bu sınıfı ekleyince kart dönecek */
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden; /* Arka yüzü gizler */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             padding: 30px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            height: fit-content;
+            text-align: center;
         }
 
-        .sidebar h4 { font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
-        
-        .sidebar-list { list-style: none; }
-        .sidebar-list li { margin-bottom: 15px; }
-        .sidebar-list a { color: var(--text-muted); text-decoration: none; transition: 0.3s; }
-        .sidebar-list a:hover { color: var(--primary); padding-left: 5px; }
+        .card-front {
+            background-color: var(--card-bg);
+            border: 2px solid #e2e8f0;
+        }
 
-        /* MOBİL UYUM */
-        @media (max-width: 768px) {
-            .blog-layout { grid-template-columns: 1fr; } /* Telefonda alt alta dizer */
-            nav ul { display: none; } /* Şimdilik telefonda menüyü gizledik */
+        .card-back {
+            background-color: var(--primary);
+            color: white;
+            transform: rotateY(180deg); /* Arka yüz başlangıçta ters durur */
+        }
+
+        .word-german { font-size: 2rem; font-weight: 700; color: var(--text-dark); margin-bottom: 10px; }
+        .word-type { font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .word-turkish { font-size: 1.8rem; font-weight: 700; margin-bottom: 15px; }
+        .example-sentence { font-size: 1rem; font-style: italic; opacity: 0.9; }
+
+        /* --- KONTROL BUTONLARI --- */
+        .controls {
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            background-color: white;
+            color: var(--primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .instruction {
+            margin-top: 30px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <nav class="container">
-            <div class="logo">Gesundheits<span>Blog</span></div>
-            <ul>
-                <li><a href="#" class="active">Artikel</a></li>
-                <li><a href="#">Kategorien</a></li>
-                <li><a href="#">Über den Autor</a></li>
-            </ul>
-        </nav>
+        <h1>PflegeDeutsch</h1>
+        <p>Hemşireler İçin Tıbbi Almanca Kartları</p>
     </header>
 
-    <section id="hero">
-        <div class="container">
-            <h2>Neueste Medizinische Erkenntnisse</h2>
-            <p>Vertrauenswürdige und verständliche Gesundheitsinformationen.</p>
-        </div>
-    </section>
-
-    <main class="container blog-layout">
-        
-        <div class="articles">
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="myCard">
             
-            <article class="post">
-                <div class="post-meta">
-                    <span class="category-tag">Kardiyoloji</span>
-                    <span>12. Mai 2024</span>
-                    <span>• 5 Min. Lesezeit</span>
-                </div>
-                <h3>Bluthochdruck: Ursachen, Symptome und Behandlung</h3>
-                <p>Bluthochdruck (Hypertonie) ist eine der häufigsten Erkrankungen weltweit. Oft bleibt er lange unbemerkt, da er selten sofortige Symptome verursacht. In diesem Artikel klären wir auf, wie Sie die Risiken minimieren können...</p>
-                <a href="#" class="read-more">Vollständigen Artikel lesen &rarr;</a>
-            </article>
-
-            <article class="post">
-                <div class="post-meta">
-                    <span class="category-tag">Beslenme</span>
-                    <span>08. Mai 2024</span>
-                    <span>• 4 Min. Lesezeit</span>
-                </div>
-                <h3>Diabetes Mellitus: Ein Leben mit der Diagnose</h3>
-                <p>Die Diagnose Diabetes verändert den Alltag drastisch. Von der richtigen Ernährung bis hin zur ständigen Blutzuckerkontrolle. Erfahren Sie hier die neuesten Ansätze aus der Diabetologie und wie Sie Ihren Alltag meistern...</p>
-                <a href="#" class="read-more">Vollständigen Artikel lesen &rarr;</a>
-            </article>
-
-        </div>
-
-        <aside class="sidebar">
-            
-            <div class="widget">
-                <h4>Kategorien (Kategoriler)</h4>
-                <ul class="sidebar-list">
-                    <li><a href="#">Kardiologie (Kalp)</a></li>
-                    <li><a href="#">Neurologie (Sinir)</a></li>
-                    <li><a href="#">Ernährung (Beslenme)</a></li>
-                    <li><a href="#">Psychologie (Psikoloji)</a></li>
-                </ul>
+            <div class="card-face card-front">
+                <div class="word-type" id="wordType">Das Nomen</div>
+                <div class="word-german" id="germanWord">Blutdruckmessgerät</div>
             </div>
 
-            <div class="widget" style="margin-top: 40px;">
-                <h4>Suche (Arama)</h4>
-                <input type="text" placeholder="Blog'da ara..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none;">
+            <div class="card-face card-back">
+                <div class="word-turkish" id="turkishWord">Tansiyon Aleti</div>
+                <div class="example-sentence" id="exampleSentence">"Ich brauche das Blutdruckmessgerät."</div>
             </div>
 
-        </aside>
+        </div>
+    </div>
 
-    </main>
+    <div class="controls">
+        <button onclick="prevWord()">&larr; Önceki</button>
+        <button onclick="nextWord()">Sonraki &rarr;</button>
+    </div>
+
+    <p class="instruction">💡 Anlamını görmek için kartın üzerine dokunun.</p>
+
+    <script>
+        // Kelime Havuzumuz (Veritabanı)
+        const vocabulary = [
+            {
+                german: "Blutdruckmessgerät",
+                type: "Das Nomen (İsim)",
+                turkish: "Tansiyon Aleti",
+                example: "Ich brauche das Blutdruckmessgerät. (Tansiyon aletine ihtiyacım var.)"
+            },
+            {
+                german: "Spritze",
+                type: "Die Nomen (İsim)",
+                turkish: "Şırınga / İğne",
+                example: "Wir müssen eine Spritze geben. (Bir iğne yapmalıyız.)"
+            },
+            {
+                german: "Schmerzmittel",
+                type: "Das Nomen (İsim)",
+                turkish: "Ağrı Kesici",
+                example: "Hat der Patient seine Schmerzmittel bekommen? (Hasta ağrı kesicilerini aldı mı?)"
+            },
+            {
+                german: "Blut abnehmen",
+                type: "Das Verb (Fiil)",
+                turkish: "Kan almak",
+                example: "Ich werde Ihnen jetzt etwas Blut abnehmen. (Şimdi sizden biraz kan alacağım.)"
+            }
+        ];
+
+        let currentIndex = 0;
+
+        // Kartı döndüren fonksiyon
+        function flipCard() {
+            document.getElementById("myCard").classList.toggle("is-flipped");
+        }
+
+        // Ekrandaki yazıları güncelleyen fonksiyon
+        function updateCard() {
+            // Kartı yeni kelimeye geçerken düzelt
+            document.getElementById("myCard").classList.remove("is-flipped");
+            
+            // 300ms bekle (dönme animasyonu bitsin diye), sonra yazıları değiştir
+            setTimeout(() => {
+                document.getElementById("germanWord").innerText = vocabulary[currentIndex].german;
+                document.getElementById("wordType").innerText = vocabulary[currentIndex].type;
+                document.getElementById("turkishWord").innerText = vocabulary[currentIndex].turkish;
+                document.getElementById("exampleSentence").innerText = vocabulary[currentIndex].example;
+            }, 200);
+        }
+
+        // Sonraki kelimeye geç
+        function nextWord() {
+            currentIndex++;
+            if (currentIndex >= vocabulary.length) {
+                currentIndex = 0; // Sona gelirse başa dön
+            }
+            updateCard();
+        }
+
+        // Önceki kelimeye dön
+        function prevWord() {
+            currentIndex--;
+            if (currentIndex < 0) {
+                currentIndex = vocabulary.length - 1; // Başta isek en sona git
+            }
+            updateCard();
+        }
+    </script>
 
 </body>
 </html>
